@@ -4,7 +4,8 @@
   "description": "WNC - Final Project - Online Academy &amp; Chatbot",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,13 @@
   },
   "homepage": "https://github.com/WNC-HCMUS-2021/Final-Project-Backend#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "ajv": "^8.5.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "knex": "^0.95.6",
+    "morgan": "^1.10.0",
+    "mysql2": "^2.2.5",
+    "nodemon": "^2.0.7"
   }
 }
