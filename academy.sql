@@ -11,7 +11,7 @@
  Target Server Version : 100410
  File Encoding         : 65001
 
- Date: 04/06/2021 20:45:44
+ Date: 04/06/2021 20:58:32
 */
 
 SET NAMES utf8mb4;
@@ -43,13 +43,29 @@ CREATE TABLE `academy`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `academy_category`;
 CREATE TABLE `academy_category`  (
-  `acadeny_category_id` int(11) NOT NULL AUTO_INCREMENT,
-  `acadeny_category_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `academy_category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `academy_category_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp(0) NULL DEFAULT NULL,
   `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
   `created_by` int(11) NULL DEFAULT NULL,
   `updated_by` int(11) NULL DEFAULT NULL,
-  PRIMARY KEY (`acadeny_category_id`) USING BTREE
+  PRIMARY KEY (`academy_category_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for academy_evaluate
+-- ----------------------------
+DROP TABLE IF EXISTS `academy_evaluate`;
+CREATE TABLE `academy_evaluate`  (
+  `academy_evaluate_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `academy_id` int(11) NOT NULL,
+  `point` int(11) NOT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp(0) NULL DEFAULT current_timestamp(0),
+  `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
+  `updated_by` int(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`academy_evaluate_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -78,22 +94,6 @@ CREATE TABLE `academy_register_like`  (
   `created_at` timestamp(0) NULL DEFAULT current_timestamp(0),
   `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`academy_register_like_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for evaluate
--- ----------------------------
-DROP TABLE IF EXISTS `evaluate`;
-CREATE TABLE `evaluate`  (
-  `evaluate_id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
-  `academy_id` int(11) NOT NULL,
-  `point` int(11) NOT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` timestamp(0) NULL DEFAULT current_timestamp(0),
-  `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
-  `updated_by` int(11) NULL DEFAULT NULL,
-  PRIMARY KEY (`evaluate_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
