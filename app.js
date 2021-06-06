@@ -3,6 +3,8 @@ const morgan = require("morgan");
 require("express-async-errors");
 const cors = require("cors");
 
+const auth = require("./middlewares/auth.mdw");
+
 const app = express();
 
 app.use(cors());
@@ -15,7 +17,9 @@ app.get("/", function (req, res) {
   });
 });
 
+app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/user", require("./routes/user.route"));
+app.use("/api/academy", auth, require("./routes/academy.route"));
 
 app.use(function (req, res, next) {
   res.status(404).json({

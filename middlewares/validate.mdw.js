@@ -1,6 +1,6 @@
-const Ajv = require('ajv').default;
+const Ajv = require("ajv");
 
-module.exports = schema => (req, res, next) => {
+module.exports = (schema) => (req, res, next) => {
   const ajv = new Ajv();
   const validate = ajv.compile(schema);
   const valid = validate(req.body);
@@ -9,4 +9,4 @@ module.exports = schema => (req, res, next) => {
   }
 
   next();
-}
+};
