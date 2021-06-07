@@ -1,28 +1,45 @@
 const db = require("../utils/db");
 
+const TABLE_NAME = 'academy_category';
+const PRIMARY_KEY = 'academy_category_id';
+const NOT_DELETE = 0;
+
 module.exports = {
   // get all
-  all() {
-    return db('academy_category');
+  async all() {
+    const listCategory = await db(TABLE_NAME)
+      .join('user', `${TABLE_NAME}.created_by`, '=', 'user.user_id')
+      .where(`${TABLE_NAME}.is_delete`, NOT_DELETE)
+      .select(`${TABLE_NAME}.*`, 'user.name as creator_name');
+
+    if (listCategory.length <= 0) {
+      return null;
+    }
+    return listCategory;
   },
   // get one
   async single(id) {
-    const categories = await db('academy_category').where('academy_category_id', id);
-    if (categories.length === 0) {
+    const item = await db(TABLE_NAME)
+      .join('user', `${TABLE_NAME}.created_by`, '=', 'user.user_id')
+      .where(`${TABLE_NAME}.is_delete`, NOT_DELETE)
+      .where(PRIMARY_KEY, id)
+      .select(`${TABLE_NAME}.*`, 'user.name as creator_name');
+
+    if (item.length === 0) {
       return null;
     }
-    return categories[0];
+    return item[0];
   },
   // add
   add(category) {
-    return db('academy_category').insert(category);
+    return db(TABLE_NAME).insert(category);
   },
   // edit
   edit(id, category) {
-    return db('academy_category').where('academy_category_id', id).update(category);
+    return db(TABLE_NAME).where(PRIMARY_KEY, id).update(category);
   },
   // delete
   delete(id) {
-    return db('academy_category').where('academy_category_id', id).del();
+    return db(TABLE_NAME).where(PRIMARY_KEY, id).update({is_delete: 1});
   },
 };

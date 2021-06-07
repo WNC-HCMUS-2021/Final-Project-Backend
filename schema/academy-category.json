@@ -1,0 +1,11 @@
+{
+  "required": [
+    "academy_category_name"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "academy_category_name": {
+      "type": "string"
+    }
+  }
+}

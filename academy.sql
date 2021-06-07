@@ -119,3 +119,11 @@ CREATE TABLE `user`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- update sql 
+ALTER TABLE `academy_category` 
+ADD COLUMN `is_delete` tinyint(1) NULL DEFAULT 0 COMMENT '0: chưa xoá, 1: đã xoá' AFTER `academy_category_name`;
+
+ALTER TABLE `user` 
+ADD COLUMN `is_delete` tinyint(1) NULL DEFAULT 0 COMMENT '0: chưa xoá, 1: đã xoá' AFTER `role`;

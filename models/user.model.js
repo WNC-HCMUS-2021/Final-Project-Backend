@@ -1,5 +1,11 @@
 const db = require("../utils/db");
 
+const TABLE_NAME = 'user';
+const PRIMARY_KEY = 'user_id';
+const ADMIN = 'admin';
+const STUDENT = 'student';
+const TEACHER = 'teacher';
+
 module.exports = {
   async all() {
     return await db("user");
@@ -32,4 +38,24 @@ module.exports = {
 
     return false;
   },
+
+  // ================================== TEACHER ====================================
+  // lấy tất cả giáo viên
+  async getAllTeacher() {
+    return await db(TABLE_NAME).where('role', TEACHER);
+  },
+
+  // chi tiết giáo viên
+  async getDetailTeacher(id) {
+    const item = await db(TABLE_NAME)
+      .where(PRIMARY_KEY, id)
+      .where('role', TEACHER);
+
+    if (item.length === 0) {
+      return null;
+    }
+    return item[0];
+  }
+
+  // ================================ END TEACHER ==================================
 };
