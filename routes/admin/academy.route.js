@@ -2,7 +2,7 @@ const express = require('express');
 const academyModel = require('../../models/academy.model');
 const router = express.Router();
 
-const { templateResponse } = require('../../middlewares/tpl-response.mdw');
+const { successResponse } = require('../../middlewares/success-response.mdw');
 
 // Lấy tất cả khoá học
 router.get('/', async function (req, res) {
@@ -16,11 +16,11 @@ router.delete('/:id', async function (req, res) {
   // check tồn tại khoá học
   const academy = await academyModel.single(id);
   if (academy === null) {
-    templateResponse(res, 'Khong ton tai khoa hoc', academy, 404, false);
+    successResponse(res, 'Khong ton tai khoa hoc', academy, 404, false);
   }
   // xoá 
   const result = await academyModel.delete(id);
-  templateResponse(res, 'Delete data success', result);
+  successResponse(res, 'Delete data success', result);
 })
 
 

@@ -53,11 +53,11 @@ CREATE TABLE `academy_category`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for academy_evaluate
+-- Table structure for academy_rate
 -- ----------------------------
-DROP TABLE IF EXISTS `academy_evaluate`;
-CREATE TABLE `academy_evaluate`  (
-  `academy_evaluate_id` int(11) NOT NULL AUTO_INCREMENT,
+DROP TABLE IF EXISTS `academy_rate`;
+CREATE TABLE `academy_rate`  (
+  `academy_rate_id` int(11) NOT NULL AUTO_INCREMENT,
   `student_id` int(11) NOT NULL,
   `academy_id` int(11) NOT NULL,
   `point` int(11) NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE `academy_evaluate`  (
   `created_at` timestamp(0) NULL DEFAULT current_timestamp(0),
   `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
   `updated_by` int(11) NULL DEFAULT NULL,
-  PRIMARY KEY (`academy_evaluate_id`) USING BTREE
+  PRIMARY KEY (`academy_rate_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------

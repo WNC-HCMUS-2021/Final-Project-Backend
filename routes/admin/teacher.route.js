@@ -4,12 +4,12 @@ const userModel = require('../../models/user.model');
 const schema = require('../../schema/teacher.json');
 const router = express.Router();
 
-const { templateResponse } = require('../../middlewares/tpl-response.mdw');
+const { successResponse } = require('../../middlewares/success-response.mdw');
 
 // lấy tất cả giáo viên
 router.get('/', async function (req, res) {
     const list = await userModel.getAllTeacher();
-    templateResponse(res, 'Query data success', list);
+    successResponse(res, 'Query data success', list);
 })
 
 // lấy chi tiết giao viên
@@ -17,9 +17,9 @@ router.get('/:id', async function (req, res) {
     const id = req.params.id || 0;
     const teacher = await userModel.getDetailTeacher(id);
     if (teacher === null) {
-        templateResponse(res, 'Khong tim thay giao vien', teacher, 404, false);
+        successResponse(res, 'Khong tim thay giao vien', teacher, 404, false);
     }
-    templateResponse(res, 'Query data success', teacher);
+    successResponse(res, 'Query data success', teacher);
 })
 
 // thêm giáo viên
@@ -31,7 +31,7 @@ router.post('/', require('../../middlewares/validate.mdw')(schema), async functi
     teacher.id = ids[0];
     delete teacher.password;
 
-    templateResponse(res, 'Create data success', teacher, 201);
+    successResponse(res, 'Create data success', teacher, 201);
 }
 );
 
