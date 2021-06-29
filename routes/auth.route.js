@@ -25,6 +25,8 @@ router.post("/", async function (req, res) {
 
   const payload = {
     userId: user.user_id,
+    username: user.username,
+    email: user.email,
     role: user.role,
   };
   const opts = {
@@ -39,6 +41,15 @@ router.post("/", async function (req, res) {
     authenticated: true,
     accessToken,
     refreshToken,
+  });
+});
+
+router.post("/verify/:token", async function (req, res) {
+  let token = await jwt.verify(req.params.token, process.env.SECRET_KEY);
+
+  await userModel.verifyEmail(token.userId);
+  return res.status(201).json({
+    verify: true,
   });
 });
 
