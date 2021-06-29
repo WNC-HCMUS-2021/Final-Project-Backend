@@ -21,12 +21,17 @@ app.get("/", function (req, res) {
 
 app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/user", require("./routes/user.route"));
+app.use("/api/academy", require("./routes/academy.route"));
+app.use("/api/category", require("./routes/academy-category.route"));
 
 // Routes For admin
-app.use("/api/admin/academy-category", auth, require("./routes/admin/academy-category.route"));
+app.use(
+  "/api/admin/academy-category",
+  auth,
+  require("./routes/admin/academy-category.route")
+);
 app.use("/api/admin/academy", auth, require("./routes/admin/academy.route"));
 app.use("/api/admin/teacher", auth, require("./routes/admin/teacher.route"));
-
 
 // Routes For user
 
@@ -43,10 +48,9 @@ app.use("/api/admin/teacher", auth, require("./routes/admin/teacher.route"));
 //   });
 // });
 
-
 // handle undefined Routes
-app.use('*', (req, res, next) => {
-  const err = new AppError(404, 'undefined route');
+app.use("*", (req, res, next) => {
+  const err = new AppError(404, "undefined route");
   next(err);
 });
 

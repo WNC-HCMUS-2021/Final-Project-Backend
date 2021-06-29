@@ -32,8 +32,9 @@ CREATE TABLE `academy`  (
   `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `teacher_id` int(11) NOT NULL COMMENT 'Mã giáo viên',
   `promotion` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'Khuyến mãi',
+  `view` int(11) NOT NULL DEFAULT 0,
   `is_delete` tinyint(1) NULL DEFAULT 0 COMMENT '0: Chưa xoá, 1: Đã xoá',
-  `created_at` timestamp(0) NULL DEFAULT NULL,
+  `created_at` timestamp(0) NULL DEFAULT NULL DEFAULT current_timestamp(0),
   `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`academy_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
@@ -45,7 +46,8 @@ DROP TABLE IF EXISTS `academy_category`;
 CREATE TABLE `academy_category`  (
   `academy_category_id` int(11) NOT NULL AUTO_INCREMENT,
   `academy_category_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` timestamp(0) NULL DEFAULT NULL,
+  `academy_parent_id` int(11) NULL DEFAULT NULL,
+  `created_at` timestamp(0) NULL DEFAULT NULL DEFAULT current_timestamp(0),
   `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
   `created_by` int(11) NULL DEFAULT NULL,
   `updated_by` int(11) NULL DEFAULT NULL,

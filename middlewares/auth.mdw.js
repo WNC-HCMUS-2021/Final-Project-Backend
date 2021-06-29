@@ -1,23 +1,19 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const { successResponse } = require("../middlewares/success-response.mdw");
 
 module.exports = function (req, res, next) {
   const accessToken = req.headers["x-access-token"];
   if (accessToken) {
     try {
       const decoded = jwt.verify(accessToken, process.env.SECRET_KEY);
-      // console.log(decoded);
       req.accessTokenPayload = decoded;
       next();
     } catch (err) {
       console.log(err);
-      return res.status(401).json({
-        message: "Invalid access token!",
-      });
+      return successResponse(res, "Invalid access token!", null, 401, false);
     }
   } else {
-    return res.status(400).json({
-      message: "Access token not found!",
-    });
+    return successResponse(res, "Access token not found!", null, 401, false);
   }
 };
