@@ -33,6 +33,7 @@ CREATE TABLE `academy`  (
   `teacher_id` int(11) NOT NULL COMMENT 'Mã giáo viên',
   `promotion` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'Khuyến mãi',
   `view` int(11) NOT NULL DEFAULT 0,
+  `rate` DOUBLE NOT NULL DEFAULT 0,
   `is_delete` tinyint(1) NULL DEFAULT 0 COMMENT '0: Chưa xoá, 1: Đã xoá',
   `created_at` timestamp(0) NULL DEFAULT NULL DEFAULT current_timestamp(0),
   `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
@@ -130,3 +131,5 @@ ADD COLUMN `is_delete` tinyint(1) NULL DEFAULT 0 COMMENT '0: chưa xoá, 1: đã
 
 ALTER TABLE `user` 
 ADD COLUMN `is_delete` tinyint(1) NULL DEFAULT 0 COMMENT '0: chưa xoá, 1: đã xoá' AFTER `role`;
+
+ALTER TABLE academy ADD FULLTEXT(academy_name)

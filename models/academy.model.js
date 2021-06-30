@@ -3,6 +3,8 @@ const db = require("../utils/db");
 const TABLE_NAME = "academy";
 const PRIMARY_KEY = "academy_id";
 
+require("dotenv").config();
+
 module.exports = {
   // get all
   async all() {
@@ -58,5 +60,13 @@ module.exports = {
 
   top10Latest() {
     return db(TABLE_NAME).orderBy("created_at", "desc").limit(10);
+  },
+
+  search(keyword, orderby = "desc", page = 1, limit = process.env.LIMIT) {
+    return db.raw(
+      `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0 ORDER BY a.rate ${orderby} LIMIT ${limit} OFFSET ${
+        (page - 1) * limit
+      } `
+    );
   },
 };

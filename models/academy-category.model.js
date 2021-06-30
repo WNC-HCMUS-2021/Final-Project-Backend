@@ -4,6 +4,8 @@ const TABLE_NAME = "academy_category";
 const PRIMARY_KEY = "academy_category_id";
 const NOT_DELETE = 0;
 
+require("dotenv").config();
+
 module.exports = {
   // get all
   async all() {
@@ -45,18 +47,33 @@ module.exports = {
 
   //get all
   async getAll() {
-    const listCategory = await db(TABLE_NAME + " as p")
-      .select("*")
-      .leftJoin(
-        TABLE_NAME + " as c",
-        "p.academy_category_id",
-        "c.academy_parent_id"
-      )
-      .where("p.academy_parent_id", null);
+    const listCategory = await db(TABLE_NAME).where("academy_parent_id", null);
+    for (i in listCategory) {
+      listCategory[i].child = await db(TABLE_NAME).where(
+        "academy_parent_id",
+        listCategory[i].academy_category_id
+      );
+    }
 
     if (listCategory.length <= 0) {
       return null;
     }
     return listCategory;
+  },
+
+  //get academy by categoryID
+  async getAcademyByCategoryId(
+    categoryId,
+    page = 1,
+    limit = process.env.LIMIT
+  ) {
+    const result = await db("academy")
+      .where("academy_category_id", categoryId)
+      .limit(limit)
+      .offset((page - 1) * limit);
+    if (result.length <= 0) {
+      return null;
+    }
+    return result;
   },
 };

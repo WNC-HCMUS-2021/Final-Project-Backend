@@ -45,7 +45,9 @@ module.exports = {
   },
 
   async singleByUserName(username) {
-    const users = await db("user").where("username", username);
+    const users = await db("user")
+      .where("username", username)
+      .where("is_delete", 0);
     if (users.length === 0) {
       return null;
     }
