@@ -8,19 +8,16 @@ require("dotenv").config();
 const userModel = require("../models/user.model");
 
 const router = express.Router();
+const { successResponse } = require("../middlewares/success-response.mdw");
 
 router.post("/", async function (req, res) {
   const user = await userModel.singleByUserName(req.body.username);
   if (user === null) {
-    return res.json({
-      authenticated: false,
-    });
+    return successResponse(res, "Username không tồn tại", null, 400, false);
   }
 
   if (!bcrypt.compareSync(req.body.password, user.password)) {
-    return res.json({
-      authenticated: false,
-    });
+    return successResponse(res, "Mật khẩu không đúng", null, 400, false);
   }
 
   const payload = {
@@ -36,21 +33,14 @@ router.post("/", async function (req, res) {
 
   const refreshToken = randomstring.generate(80);
   await userModel.patchRFToken(user.user_id, refreshToken);
-
-  return res.json({
-    authenticated: true,
-    accessToken,
-    refreshToken,
-  });
+  return successResponse(res, "Success", { accessToken, refreshToken });
 });
 
 router.post("/verify/:token", async function (req, res) {
   let token = await jwt.verify(req.params.token, process.env.SECRET_KEY);
 
   await userModel.verifyEmail(token.userId);
-  return res.status(201).json({
-    verify: true,
-  });
+  return successResponse(res, "Success");
 });
 
 router.post("/refresh", async function (req, res) {
@@ -64,14 +54,9 @@ router.post("/refresh", async function (req, res) {
     const newAccessToken = jwt.sign({ userId }, process.env.SECRET_KEY, {
       expiresIn: 10 * 60,
     });
-    return res.json({
-      accessToken: newAccessToken,
-    });
+    return successResponse(res, "Success", { accessToken: newAccessToken });
   }
-
-  return res.status(400).json({
-    message: "Refresh token is revoked!",
-  });
+  return successResponse(res, "Refresh token is revoked!", null, 400, false);
 });
 
 module.exports = router;

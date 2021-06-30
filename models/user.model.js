@@ -24,6 +24,17 @@ module.exports = {
     return users[0];
   },
 
+  async getByEmailUpdate(username, email) {
+    const users = await db("user")
+      .where("email", email)
+      .where("username", "!=", username);
+    if (users.length === 0) {
+      return null;
+    }
+
+    return users[0];
+  },
+
   async getByPhone(phone) {
     const users = await db("user").where("phone_number", phone);
     if (users.length === 0) {
@@ -34,7 +45,9 @@ module.exports = {
   },
 
   async singleByUserName(username) {
-    const users = await db("user").where("username", username);
+    const users = await db("user")
+      .where("username", username)
+      .where("is_delete", 0);
     if (users.length === 0) {
       return null;
     }
@@ -59,6 +72,17 @@ module.exports = {
 
   async verifyEmail(userId) {
     return db("user").where("user_id", userId).update("is_verify", 1);
+  },
+
+  async updateProfile(username, name, email) {
+    return db("user")
+      .where("username", username)
+      .update("name", name)
+      .update("email", email);
+  },
+
+  async changePassword(username, password) {
+    return db("user").where("username", username).update("password", password);
   },
 
   // ================================== TEACHER ====================================
