@@ -1,8 +1,6 @@
 const express = require("express");
 const academyModel = require("../models/academy.model");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 
 const auth = require("../middlewares/auth.mdw");
 
@@ -13,6 +11,12 @@ require("dotenv").config();
 router.get("/detail/:id", async function (req, res) {
   let id = req.params.id;
   const list = await academyModel.single(id);
+  return successResponse(res, "Success", list);
+});
+
+router.get("/outline/:id", async function (req, res) {
+  let id = req.params.id;
+  const list = await academyModel.getOutline(id);
   return successResponse(res, "Success", list);
 });
 

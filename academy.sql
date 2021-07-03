@@ -78,6 +78,8 @@ DROP TABLE IF EXISTS `academy_outline`;
 CREATE TABLE `academy_outline`  (
   `academy_outline_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Mã đề cương khoá học',
   `academy_id` int(11) NOT NULL COMMENT 'Mã khoá học',
+  `title` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Tiêu đề chương học',
+  `url_video` text NOT NULL COMMENT 'URL video',
   `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nội dung',
   `created_at` timestamp(0) NULL DEFAULT current_timestamp(0),
   `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
