@@ -176,4 +176,37 @@ router.post(
   }
 );
 
+router.post(
+  "/register-academy",
+  auth,
+  require("../middlewares/validate.mdw")(userSchema.registerAcademy),
+  async function (req, res) {
+    let { academy_id } = req.body;
+
+    let result = await userModel.registerAcademy(
+      req.accessTokenPayload.username,
+      academy_id
+    );
+    if (result === true) {
+      return successResponse(res, "Success");
+    } else if (result === "registered") {
+      return successResponse(
+        res,
+        "You have registered before",
+        null,
+        400,
+        false
+      );
+    } else if (result === "do not have enough money") {
+      return successResponse(
+        res,
+        "You do not have enough money",
+        null,
+        400,
+        false
+      );
+    }
+  }
+);
+
 module.exports = router;

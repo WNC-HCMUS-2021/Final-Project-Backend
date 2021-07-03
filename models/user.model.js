@@ -7,7 +7,7 @@ const STUDENT = "student";
 const TEACHER = "teacher";
 const NOT_DELETE = 0;
 const LIMIT = process.env.LIMIT;
-const SORT_TYPE = "ASC"
+const SORT_TYPE = "ASC";
 
 module.exports = {
   async all() {
@@ -86,6 +86,54 @@ module.exports = {
 
   async changePassword(username, password) {
     return db("user").where("username", username).update("password", password);
+  },
+
+  async registerAcademy(username, academy_id) {
+    let academy = await db("academy")
+      .where("academy_id", academy_id)
+      .where("is_delete", 0)
+      .first();
+    if (!academy) {
+      return academy;
+    }
+
+    let user = await this.singleByUserName(username);
+
+    let isRegisterAcademy = await db("academy_register_like")
+      .where("student_id", user.user_id)
+      .where("academy_id", academy_id)
+      .where("is_register", 1)
+      .first();
+
+    if (isRegisterAcademy) {
+      return "registered";
+    }
+
+    if (academy.price > user.money) {
+      return "do not have enough money";
+    }
+
+    var t = await db.transaction();
+    try {
+      await db("user")
+        .where("username", username)
+        .update({ money: user.money - academy.price });
+
+      await db("academy_register_like").insert({
+        student_id: user.user_id,
+        academy_id: academy_id,
+        is_register: 1,
+      });
+
+      await db("academy")
+        .where("academy_id", academy_id)
+        .update({ register: academy.register + 1 });
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      t.rollback();
+    }
   },
 
   // ================================== TEACHER ====================================

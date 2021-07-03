@@ -87,5 +87,15 @@
         "type": "string"
       }
     }
+  },
+  "registerAcademy": {
+    "type": "object",
+    "required": ["academy_id"],
+    "additionalProperties": false,
+    "properties": {
+      "academy_id": {
+        "type": "string"
+      }
+    }
   }
 }
