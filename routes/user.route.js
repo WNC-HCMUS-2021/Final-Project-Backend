@@ -1,5 +1,6 @@
 const express = require("express");
 const userModel = require("../models/user.model");
+const academyModel = require("../models/academy.model");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const randomstring = require("randomstring");
@@ -16,10 +17,10 @@ router.get("/", async function (req, res) {
   res.json(list);
 });
 
-const registerSchema = require("../schema/user-register.json");
+const userSchema = require("../schema/user.json");
 router.post(
   "/register",
-  require("../middlewares/validate.mdw")(registerSchema),
+  require("../middlewares/validate.mdw")(userSchema.register),
   async function (req, res) {
     const user = req.body;
 
@@ -65,11 +66,10 @@ router.post(
   }
 );
 
-const updateProfileSchema = require("../schema/user-update-profile.json");
 router.put(
   "/update-profile",
   auth,
-  require("../middlewares/validate.mdw")(updateProfileSchema),
+  require("../middlewares/validate.mdw")(userSchema.updateProfile),
   async function (req, res) {
     const user = req.body;
 
@@ -91,11 +91,10 @@ router.put(
   }
 );
 
-const changePasswordSchema = require("../schema/user-change-password.json");
 router.put(
   "/change-password",
   auth,
-  require("../middlewares/validate.mdw")(changePasswordSchema),
+  require("../middlewares/validate.mdw")(userSchema.changPassword),
   async function (req, res) {
     const user = req.body;
 
@@ -117,6 +116,63 @@ router.put(
     );
 
     return successResponse(res, "Cập nhật thành công");
+  }
+);
+
+router.get("/my-academy", auth, async function (req, res) {
+  let list = await academyModel.getAcademyByUserId(
+    req.accessTokenPayload.userId
+  );
+  return successResponse(res, "Success", list);
+});
+
+router.get("/watch-list", auth, async function (req, res) {
+  let list = await academyModel.getWatchList(req.accessTokenPayload.userId);
+  return successResponse(res, "Success", list);
+});
+
+router.post("/watch-list/:id", auth, async function (req, res) {
+  let id = req.params.id;
+  let result = await academyModel.addToWatchList(
+    req.accessTokenPayload.userId,
+    id
+  );
+  if (result) {
+    return successResponse(res, "Success");
+  }
+  return successResponse(res, "Academy ID invalid", null, 400, false);
+});
+
+router.delete("/watch-list/:id", auth, async function (req, res) {
+  let id = req.params.id;
+  if (!id) {
+    return successResponse(res, "Academy ID invalid", null, 400, false);
+  }
+  let result = await academyModel.deleteWatchList(
+    req.accessTokenPayload.userId,
+    id
+  );
+  if (result && result != 0) {
+    return successResponse(res, "Success");
+  }
+  return successResponse(res, "Academy ID invalid", null, 400, false);
+});
+
+router.post(
+  "/rate",
+  auth,
+  require("../middlewares/validate.mdw")(userSchema.rate),
+  async function (req, res) {
+    let rate = req.body;
+
+    let result = await academyModel.rateAcademy(
+      req.accessTokenPayload.userId,
+      rate
+    );
+    if (result) {
+      return successResponse(res, "Success");
+    }
+    return successResponse(res, "Cannot rate this academy", null, 400, false);
   }
 );
 
