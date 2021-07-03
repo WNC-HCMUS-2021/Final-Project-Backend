@@ -10,6 +10,7 @@ require("dotenv").config();
 
 router.get("/detail/:id", async function (req, res) {
   let id = req.params.id;
+  await academyModel.addView(id);
   const list = await academyModel.single(id);
   return successResponse(res, "Success", list);
 });
@@ -44,8 +45,14 @@ router.get("/search", async function (req, res) {
       ? "desc"
       : req.query.orderby;
 
-  const list = await academyModel.search(keyword, orderby, page, limit);
-  return successResponse(res, "Success", list[0]);
+  let list;
+  if (!keyword) {
+    list = await academyModel.getAll(orderby, page, limit);
+  } else {
+    list = await academyModel.search(keyword, orderby, page, limit);
+  }
+
+  return successResponse(res, "Success", list);
 });
 
 module.exports = router;

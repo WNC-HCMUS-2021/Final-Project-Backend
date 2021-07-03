@@ -4,7 +4,7 @@ const TABLE_NAME = "academy";
 const PRIMARY_KEY = "academy_id";
 const NOT_DELETE = 0;
 const LIMIT = process.env.LIMIT;
-const SORT_TYPE = "ASC"
+const SORT_TYPE = "ASC";
 
 module.exports = {
   // get all by filter
@@ -85,9 +85,17 @@ module.exports = {
 
   search(keyword, orderby = "desc", page = 1, limit = process.env.LIMIT) {
     return db.raw(
-      `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0 ORDER BY a.rate ${orderby} LIMIT ${limit} OFFSET ${(page - 1) * limit
+      `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0 ORDER BY a.rate ${orderby} LIMIT ${limit} OFFSET ${
+        (page - 1) * limit
       } `
     );
+  },
+
+  getAll(orderby = "desc", page = 1, limit = process.env.LIMIT) {
+    return db(TABLE_NAME)
+      .orderBy("rate", orderby)
+      .limit(limit)
+      .offset((page - 1) * limit);
   },
 
   getWatchList(userId) {
@@ -130,6 +138,21 @@ module.exports = {
         .delete();
     }
     return null;
+  },
+
+  async addView(academy_id) {
+    let academy = await db("academy")
+      .where("academy_id", academy_id)
+      .where("is_delete", 0)
+      .first();
+    if (!academy) {
+      return academy;
+    }
+
+    await db("academy")
+      .where("academy_id", academy_id)
+      .update({ view: academy.view + 1 });
+    return true;
   },
 
   async rateAcademy(userId, rate) {
