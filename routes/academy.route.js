@@ -48,11 +48,11 @@ router.get("/search", async function (req, res) {
   let list;
   if (!keyword) {
     list = await academyModel.getAll(orderby, page, limit);
+    return successResponse(res, "Success", list);
   } else {
     list = await academyModel.search(keyword, orderby, page, limit);
+    return successResponse(res, "Success", list[0]);
   }
-
-  return successResponse(res, "Success", list);
 });
 
 module.exports = router;
