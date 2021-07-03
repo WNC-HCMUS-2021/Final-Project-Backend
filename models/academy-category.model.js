@@ -3,16 +3,19 @@ const db = require("../utils/db");
 const TABLE_NAME = "academy_category";
 const PRIMARY_KEY = "academy_category_id";
 const NOT_DELETE = 0;
-
-require("dotenv").config();
+const LIMIT = process.env.LIMIT;
+const SORT_TYPE = "ASC"
 
 module.exports = {
-  // get all
-  async all() {
+  // get all by filter
+  async all(page = 1, limit = LIMIT, sort = SORT_TYPE) {
     const listCategory = await db(TABLE_NAME)
       .join("user", `${TABLE_NAME}.created_by`, "=", "user.user_id")
       .where(`${TABLE_NAME}.is_delete`, NOT_DELETE)
-      .select(`${TABLE_NAME}.*`, "user.name as creator_name");
+      .select(`${TABLE_NAME}.*`, "user.name as creator_name")
+      .orderBy(`${TABLE_NAME}.${PRIMARY_KEY}`, sort)
+      .limit(limit)
+      .offset((page - 1) * limit);
 
     if (listCategory.length <= 0) {
       return null;

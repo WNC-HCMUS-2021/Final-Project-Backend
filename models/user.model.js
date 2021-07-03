@@ -5,6 +5,9 @@ const PRIMARY_KEY = "user_id";
 const ADMIN = "admin";
 const STUDENT = "student";
 const TEACHER = "teacher";
+const NOT_DELETE = 0;
+const LIMIT = process.env.LIMIT;
+const SORT_TYPE = "ASC"
 
 module.exports = {
   async all() {
@@ -86,16 +89,26 @@ module.exports = {
   },
 
   // ================================== TEACHER ====================================
-  // lấy tất cả giáo viên
-  async getAllTeacher() {
-    return await db(TABLE_NAME).where("role", TEACHER);
+  // lấy tất cả giáo viên, học viên
+  async getAllUser(page = 1, limit = LIMIT, sort = SORT_TYPE, role = TEACHER) {
+    const listTeacher = await db(TABLE_NAME)
+      .where("role", role)
+      .where("is_delete", NOT_DELETE)
+      .orderBy(`${PRIMARY_KEY}`, sort)
+      .limit(limit)
+      .offset((page - 1) * limit);
+
+    if (listTeacher.length <= 0) {
+      return null;
+    }
+    return listTeacher;
   },
 
   // chi tiết giáo viên
-  async getDetailTeacher(id) {
+  async getDetailUser(id) {
     const item = await db(TABLE_NAME)
       .where(PRIMARY_KEY, id)
-      .where("role", TEACHER);
+      .where("is_delete", NOT_DELETE);
 
     if (item.length === 0) {
       return null;
@@ -103,5 +116,24 @@ module.exports = {
     return item[0];
   },
 
+  // thêm giáo viên
+  addTeacher(user) {
+    return db(TABLE_NAME).insert(user);
+  },
+
+  // chỉnh sửa giáo viên
+  async editTeacherById(id, data) {
+    return db(TABLE_NAME).where(PRIMARY_KEY, id).update(data);
+  },
+
+  // chỉnh sửa giáo viên
+  async changePasswordUser(id, data) {
+    return db(TABLE_NAME).where(PRIMARY_KEY, id).update({ password: data });
+  },
+
+  // xoá giáo viên, học viên
+  deleteUser(id) {
+    return db(TABLE_NAME).where(PRIMARY_KEY, id).update({ is_delete: 1 });
+  },
   // ================================ END TEACHER ==================================
 };

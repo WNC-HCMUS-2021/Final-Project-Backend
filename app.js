@@ -1,7 +1,8 @@
 const express = require("express");
 const morgan = require("morgan");
-require("express-async-errors");
 const cors = require("cors");
+require("express-async-errors");
+require("dotenv").config();
 
 const auth = require("./middlewares/auth.mdw");
 const handlerError = require("./middlewares/error-response.mdw");
@@ -31,7 +32,7 @@ app.use(
   require("./routes/admin/academy-category.route")
 );
 app.use("/api/admin/academy", auth, require("./routes/admin/academy.route"));
-app.use("/api/admin/teacher", auth, require("./routes/admin/teacher.route"));
+app.use("/api/admin/user", auth, require("./routes/admin/user.route"));
 
 // Routes For user
 

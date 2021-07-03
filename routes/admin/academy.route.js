@@ -6,8 +6,16 @@ const { successResponse } = require('../../middlewares/success-response.mdw');
 
 // Lấy tất cả khoá học
 router.get('/', async function (req, res) {
-  const list = await academyModel.all();
-  res.json(list);
+  // phân trang (page, limit), sắp xếp
+  let page = req.query.page;
+  let limit = req.query.limit;
+  let sort = req.query.sort;
+  const list = await academyModel.all(page, limit, sort);
+  const data = {
+    data: list,
+    page: page ? page : 1
+  }
+  successResponse(res, "Query data success", data);
 });
 
 // Gỡ bỏ khoá học
@@ -16,7 +24,7 @@ router.delete('/:id', async function (req, res) {
   // check tồn tại khoá học
   const academy = await academyModel.single(id);
   if (academy === null) {
-    successResponse(res, 'Khong ton tai khoa hoc', academy, 404, false);
+    successResponse(res, 'No academy exist', academy, 404, false);
   }
   // xoá 
   const result = await academyModel.delete(id);
