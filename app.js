@@ -3,6 +3,10 @@ const morgan = require("morgan");
 const cors = require("cors");
 require("express-async-errors");
 require("dotenv").config();
+body_parser = require("body-parser");
+request = require("request");
+
+const categoryModel = require("./models/academy-category.model");
 
 const auth = require("./middlewares/auth.mdw");
 const handlerError = require("./middlewares/error-response.mdw");
@@ -20,6 +24,10 @@ app.get("/", function (req, res) {
   });
 });
 
+app.use(body_parser.json());
+app.use("/api/chatbot", require("./routes/chatbot.route"));
+
+//API
 app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/user", require("./routes/user.route"));
 app.use("/api/academy", require("./routes/academy.route"));

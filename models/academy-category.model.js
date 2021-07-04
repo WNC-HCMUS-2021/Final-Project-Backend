@@ -4,7 +4,7 @@ const TABLE_NAME = "academy_category";
 const PRIMARY_KEY = "academy_category_id";
 const NOT_DELETE = 0;
 const LIMIT = process.env.LIMIT;
-const SORT_TYPE = "ASC"
+const SORT_TYPE = "ASC";
 
 module.exports = {
   // get all by filter
@@ -58,6 +58,14 @@ module.exports = {
       );
     }
 
+    if (listCategory.length <= 0) {
+      return null;
+    }
+    return listCategory;
+  },
+
+  async getCateChild() {
+    const listCategory = await db(TABLE_NAME).whereNotNull("academy_parent_id");
     if (listCategory.length <= 0) {
       return null;
     }
