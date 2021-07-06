@@ -59,7 +59,7 @@ module.exports = {
     return db(TABLE_NAME).where(PRIMARY_KEY, id).update({ is_delete: 1 });
   },
 
-  top3Highlight() {
+  top4Highlight() {
     const now = new Date();
     const temp = new Date();
     temp.setDate(temp.getDate() - 7);
@@ -69,10 +69,11 @@ module.exports = {
       .select("a.*")
       .where("a.created_at", "<", now)
       .where("a.created_at", ">", temp)
+      .where("r.is_register", 1)
       .count("r.academy_id as register")
       .groupBy("a.academy_id")
       .orderBy("register", "desc")
-      .limit(3);
+      .limit(4);
   },
 
   top10View() {
@@ -83,17 +84,47 @@ module.exports = {
     return db(TABLE_NAME).orderBy("created_at", "desc").limit(10);
   },
 
-  search(keyword, orderby = "desc", page = 1, limit = process.env.LIMIT) {
+  search(keyword, rate, price, page = 1, limit = process.env.LIMIT) {
+    if (rate && (rate == "desc" || rate == "asc")) {
+      return db.raw(
+        `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0 ORDER BY a.rate ${rate} LIMIT ${limit} OFFSET ${
+          (page - 1) * limit
+        } `
+      );
+    }
+
+    if (price && (price == "desc" || price == "asc")) {
+      return db.raw(
+        `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0 ORDER BY a.price ${price} LIMIT ${limit} OFFSET ${
+          (page - 1) * limit
+        } `
+      );
+    }
+
     return db.raw(
-      `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0 ORDER BY a.rate ${orderby} LIMIT ${limit} OFFSET ${
+      `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0 ORDER BY a.rate desc LIMIT ${limit} OFFSET ${
         (page - 1) * limit
       } `
     );
   },
 
-  getAll(orderby = "desc", page = 1, limit = process.env.LIMIT) {
+  getAll(rate, price, page = 1, limit = process.env.LIMIT) {
+    if (rate && (rate == "desc" || rate == "asc")) {
+      return db(TABLE_NAME)
+        .orderBy("rate", rate)
+        .limit(limit)
+        .offset((page - 1) * limit);
+    }
+
+    if (price && (price == "desc" || price == "asc")) {
+      return db(TABLE_NAME)
+        .orderBy("price", price)
+        .limit(limit)
+        .offset((page - 1) * limit);
+    }
+
     return db(TABLE_NAME)
-      .orderBy("rate", orderby)
+      .orderBy("rate", "desc")
       .limit(limit)
       .offset((page - 1) * limit);
   },
@@ -156,6 +187,11 @@ module.exports = {
   },
 
   async rateAcademy(userId, rate) {
+    let existAcademy = await this.single(rate.academy_id);
+    if (!existAcademy) {
+      return false;
+    }
+
     let isRateAcademy = await db("academy_rate")
       .where("student_id", userId)
       .where("academy_id", rate.academy_id);
@@ -203,5 +239,31 @@ module.exports = {
       console.log(error);
       t.rollback();
     }
+  },
+
+  async getRateAcademy(academy_id) {
+    const listRate = await db("academy_rate").where("academy_id", academy_id);
+
+    if (listRate.length <= 0) {
+      return null;
+    }
+    return listRate;
+  },
+
+  async related(academy_id) {
+    let existAcademy = await this.single(academy_id);
+    if (!existAcademy) {
+      return false;
+    }
+
+    return db("academy_register_like as r")
+      .join(TABLE_NAME + " as a", "a.academy_id", "=", "r.academy_id")
+      .select("a.*")
+      .where("a.academy_id", "!=", existAcademy.academy_id)
+      .where("a.academy_category_id", existAcademy.academy_category_id)
+      .count("r.academy_id as register")
+      .groupBy("a.academy_id")
+      .orderBy("register", "desc")
+      .limit(5);
   },
 };

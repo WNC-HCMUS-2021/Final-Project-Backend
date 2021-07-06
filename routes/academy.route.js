@@ -21,8 +21,28 @@ router.get("/outline/:id", async function (req, res) {
   return successResponse(res, "Success", list);
 });
 
-router.get("/top3highlight", async function (req, res) {
-  const list = await academyModel.top3Highlight();
+router.get("/:id/rate", async function (req, res) {
+  let id = req.params.id;
+  const list = await academyModel.getRateAcademy(id);
+  return successResponse(res, "Success", list);
+});
+
+router.get("/top4highlight", async function (req, res) {
+  const list = await academyModel.top4Highlight();
+
+  if (!list) {
+    return null;
+  }
+  return successResponse(res, "Success", list);
+});
+
+router.get("/:id/related", async function (req, res) {
+  let id = req.params.id;
+
+  const list = await academyModel.related(id);
+  if (!list) {
+    return null;
+  }
   return successResponse(res, "Success", list);
 });
 
@@ -40,17 +60,15 @@ router.get("/search", async function (req, res) {
   let keyword = req.query.keyword;
   let page = req.query.page;
   let limit = req.query.limit;
-  let orderby =
-    req.query.orderby != "asc" && req.query.orderby != "desc"
-      ? "desc"
-      : req.query.orderby;
+  let rate = req.query.rate;
+  let price = req.query.price;
 
   let list;
   if (!keyword) {
-    list = await academyModel.getAll(orderby, page, limit);
+    list = await academyModel.getAll(rate, price, page, limit);
     return successResponse(res, "Success", list);
   } else {
-    list = await academyModel.search(keyword, orderby, page, limit);
+    list = await academyModel.search(keyword, rate, price, page, limit);
     return successResponse(res, "Success", list[0]);
   }
 });
