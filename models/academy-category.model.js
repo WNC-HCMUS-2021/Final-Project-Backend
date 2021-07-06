@@ -78,13 +78,47 @@ module.exports = {
     page = 1,
     limit = process.env.LIMIT
   ) {
-    const result = await db("academy")
+    let existCategory = await db(TABLE_NAME)
       .where("academy_category_id", categoryId)
-      .limit(limit)
-      .offset((page - 1) * limit);
-    if (result.length <= 0) {
+      .first();
+    if (!existCategory) {
       return null;
     }
-    return result;
+    if (existCategory.academy_parent_id !== null) {
+      const result = await db("academy")
+        .where("academy_category_id", categoryId)
+        .limit(limit)
+        .offset((page - 1) * limit);
+      if (result.length <= 0) {
+        return null;
+      }
+      return result;
+    } else {
+      const result = await db(TABLE_NAME)
+        .where("academy_parent_id", categoryId)
+        .limit(limit)
+        .offset((page - 1) * limit);
+      if (result.length <= 0) {
+        return null;
+      }
+      return result;
+    }
+  },
+
+  async getTop4Category() {
+    return db("academy_register_like as r")
+      .join("academy as a", "a.academy_id", "=", "r.academy_id")
+      .join(
+        "academy_category as c",
+        "a.academy_category_id",
+        "=",
+        "c.academy_category_id"
+      )
+      .where("r.is_register", 1)
+      .count("r.academy_id as register")
+      .groupBy("c.academy_category_id")
+      .orderBy("register", "desc")
+      .select("c.*")
+      .limit(4);
   },
 };
