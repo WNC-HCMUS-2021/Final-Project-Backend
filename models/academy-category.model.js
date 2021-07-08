@@ -72,39 +72,6 @@ module.exports = {
     return listCategory;
   },
 
-  //get academy by categoryID
-  async getAcademyByCategoryId(
-    categoryId,
-    page = 1,
-    limit = process.env.LIMIT
-  ) {
-    let existCategory = await db(TABLE_NAME)
-      .where("academy_category_id", categoryId)
-      .first();
-    if (!existCategory) {
-      return null;
-    }
-    if (existCategory.academy_parent_id !== null) {
-      const result = await db("academy")
-        .where("academy_category_id", categoryId)
-        .limit(limit)
-        .offset((page - 1) * limit);
-      if (result.length <= 0) {
-        return null;
-      }
-      return result;
-    } else {
-      const result = await db(TABLE_NAME)
-        .where("academy_parent_id", categoryId)
-        .limit(limit)
-        .offset((page - 1) * limit);
-      if (result.length <= 0) {
-        return null;
-      }
-      return result;
-    }
-  },
-
   async getTop4Category() {
     return db("academy_register_like as r")
       .join("academy as a", "a.academy_id", "=", "r.academy_id")
