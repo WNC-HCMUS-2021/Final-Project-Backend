@@ -90,11 +90,11 @@
   },
   "registerAcademy": {
     "type": "object",
-    "required": ["academy_id"],
+    "required": ["listAcademy"],
     "additionalProperties": false,
     "properties": {
-      "academy_id": {
-        "type": "string"
+      "listAcademy": {
+        "type": "array"
       }
     }
   }
