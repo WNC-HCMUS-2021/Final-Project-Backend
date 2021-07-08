@@ -8,6 +8,18 @@ const { successResponse } = require("../middlewares/success-response.mdw");
 
 require("dotenv").config();
 
+router.get("/category/:categoryId", async function (req, res) {
+  let page = req.query.page;
+  let limit = req.query.limit;
+  let categoryId = req.params.categoryId;
+  const list = await academyModel.getAcademyByCategoryId(
+    categoryId,
+    page,
+    limit
+  );
+  return successResponse(res, "Success", list);
+});
+
 router.get("/detail/:id", async function (req, res) {
   let id = req.params.id;
   await academyModel.addView(id);
@@ -41,7 +53,7 @@ router.get("/:id/related", async function (req, res) {
 
   const list = await academyModel.related(id);
   if (!list) {
-    return null;
+    return successResponse(res, "Success", []);
   }
   return successResponse(res, "Success", list);
 });
@@ -58,6 +70,7 @@ router.get("/top10latest", async function (req, res) {
 
 router.get("/search", async function (req, res) {
   let keyword = req.query.keyword;
+  let category = req.query.category;
   let page = req.query.page;
   let limit = req.query.limit;
   let rate = req.query.rate;
@@ -65,10 +78,17 @@ router.get("/search", async function (req, res) {
 
   let list;
   if (!keyword) {
-    list = await academyModel.getAll(rate, price, page, limit);
+    list = await academyModel.getAll(category, rate, price, page, limit);
     return successResponse(res, "Success", list);
   } else {
-    list = await academyModel.search(keyword, rate, price, page, limit);
+    list = await academyModel.search(
+      keyword,
+      category,
+      rate,
+      price,
+      page,
+      limit
+    );
     return successResponse(res, "Success", list[0]);
   }
 });

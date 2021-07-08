@@ -59,12 +59,12 @@ module.exports = {
     return db(TABLE_NAME).where(PRIMARY_KEY, id).update({ is_delete: 1 });
   },
 
-  top4Highlight() {
+  async top4Highlight() {
     const now = new Date();
     const temp = new Date();
     temp.setDate(temp.getDate() - 7);
 
-    return db("academy_register_like as r")
+    let result = await db("academy_register_like as r")
       .join(TABLE_NAME + " as a", "a.academy_id", "=", "r.academy_id")
       .select("a.*")
       .where("a.created_at", "<", now)
@@ -74,75 +74,185 @@ module.exports = {
       .groupBy("a.academy_id")
       .orderBy("register", "desc")
       .limit(4);
+
+    for (let i = 0; i < result.length; i++) {
+      result[i].teacher = await db("user")
+        .select(["user_id", "name", "avatar", "description"])
+        .where("user_id", result[i].teacher_id)
+        .first();
+    }
+    return result;
   },
 
-  top10View() {
-    return db(TABLE_NAME).orderBy("view", "desc").limit(10);
+  async top10View() {
+    let result = await db(TABLE_NAME).orderBy("view", "desc").limit(10);
+
+    for (let i = 0; i < result.length; i++) {
+      result[i].teacher = await db("user")
+        .select(["user_id", "name", "avatar", "description"])
+        .where("user_id", result[i].teacher_id)
+        .first();
+    }
+    return result;
   },
 
-  top10Latest() {
-    return db(TABLE_NAME).orderBy("created_at", "desc").limit(10);
+  async top10Latest() {
+    let result = await db(TABLE_NAME).orderBy("created_at", "desc").limit(10);
+
+    for (let i = 0; i < result.length; i++) {
+      result[i].teacher = await db("user")
+        .select(["user_id", "name", "avatar", "description"])
+        .where("user_id", result[i].teacher_id)
+        .first();
+    }
+    return result;
   },
 
-  search(keyword, rate, price, page = 1, limit = process.env.LIMIT) {
+  async search(
+    keyword,
+    category,
+    rate,
+    price,
+    page = 1,
+    limit = process.env.LIMIT
+  ) {
+    let rawQuery = `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0`;
+
+    if (category) {
+      let temp = await db("academy_category")
+        .where("academy_category_id", category)
+        .first();
+      if (!temp) {
+        return null;
+      }
+
+      if (!temp.academy_parent_id) {
+        let child = await db("academy_category")
+          .select("academy_category_id")
+          .where("academy_parent_id", temp.academy_category_id);
+
+        let childList = child.map((data) => data.academy_category_id);
+        rawQuery += ` and academy_category_id in (${childList})`;
+      } else {
+        rawQuery += ` and academy_category_id = ${category}`;
+      }
+    }
+
     if (rate && (rate == "desc" || rate == "asc")) {
-      return db.raw(
-        `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0 ORDER BY a.rate ${rate} LIMIT ${limit} OFFSET ${
-          (page - 1) * limit
-        } `
-      );
-    }
-
-    if (price && (price == "desc" || price == "asc")) {
-      return db.raw(
-        `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0 ORDER BY a.price ${price} LIMIT ${limit} OFFSET ${
-          (page - 1) * limit
-        } `
-      );
-    }
-
-    return db.raw(
-      `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0 ORDER BY a.rate desc LIMIT ${limit} OFFSET ${
+      rawQuery += ` ORDER BY a.rate ${rate} LIMIT ${limit} OFFSET ${
         (page - 1) * limit
-      } `
-    );
-  },
-
-  getAll(rate, price, page = 1, limit = process.env.LIMIT) {
-    if (rate && (rate == "desc" || rate == "asc")) {
-      return db(TABLE_NAME)
-        .orderBy("rate", rate)
-        .limit(limit)
-        .offset((page - 1) * limit);
+      } `;
+      return db.raw(rawQuery);
     }
 
     if (price && (price == "desc" || price == "asc")) {
-      return db(TABLE_NAME)
-        .orderBy("price", price)
-        .limit(limit)
-        .offset((page - 1) * limit);
+      rawQuery += ` ORDER BY a.price ${price} LIMIT ${limit} OFFSET ${
+        (page - 1) * limit
+      } `;
+      return db.raw(rawQuery);
     }
 
-    return db(TABLE_NAME)
-      .orderBy("rate", "desc")
+    rawQuery += ` ORDER BY a.rate desc LIMIT ${limit} OFFSET ${
+      (page - 1) * limit
+    } `;
+
+    let result = await db.raw(rawQuery);
+    for (let i = 0; i < result[0].length; i++) {
+      result[0][i].teacher = await db("user")
+        .select(["user_id", "name", "avatar", "description"])
+        .where("user_id", result[0][i].teacher_id)
+        .first();
+    }
+    return result;
+  },
+
+  async getAll(category, rate, price, page = 1, limit = process.env.LIMIT) {
+    let query = db(TABLE_NAME)
       .limit(limit)
       .offset((page - 1) * limit);
+
+    if (category) {
+      let temp = await db("academy_category")
+        .where("academy_category_id", category)
+        .first();
+      if (!temp) {
+        return null;
+      }
+      if (!temp.academy_parent_id) {
+        query.whereIn("academy_category_id", function () {
+          this.select("academy_category_id")
+            .from("academy_category")
+            .where("academy_parent_id", temp.academy_category_id);
+        });
+      } else {
+        query.where("academy_category_id", category);
+      }
+    }
+    let result;
+    if (rate && (rate == "desc" || rate == "asc")) {
+      result = await query.orderBy("rate", rate);
+
+      for (let i = 0; i < result.length; i++) {
+        result[i].teacher = await db("user")
+          .select(["user_id", "name", "avatar", "description"])
+          .where("user_id", result[i].teacher_id)
+          .first();
+      }
+      return result;
+    }
+
+    if (price && (price == "desc" || price == "asc")) {
+      result = await query.orderBy("price", price);
+
+      for (let i = 0; i < result.length; i++) {
+        result[i].teacher = await db("user")
+          .select(["user_id", "name", "avatar", "description"])
+          .where("user_id", result[i].teacher_id)
+          .first();
+      }
+      return result;
+    }
+
+    result = await query.orderBy("rate", "desc");
+    for (let i = 0; i < result.length; i++) {
+      result[i].teacher = await db("user")
+        .select(["user_id", "name", "avatar", "description"])
+        .where("user_id", result[i].teacher_id)
+        .first();
+    }
+    return result;
   },
 
-  getWatchList(userId) {
-    return db("academy_register_like as r")
+  async getWatchList(userId) {
+    let result = await db("academy_register_like as r")
       .where("r.student_id", userId)
       .where("is_like", 1)
       .join(TABLE_NAME + " as a", "a.academy_id", "=", "r.academy_id")
       .select("a.*");
+
+    for (let i = 0; i < result.length; i++) {
+      result[i].teacher = await db("user")
+        .select(["user_id", "name", "avatar", "description"])
+        .where("user_id", result[i].teacher_id)
+        .first();
+    }
+    return result;
   },
 
-  getAcademyByUserId(userId) {
-    return db("academy_register_like as r")
+  async getAcademyByUserId(userId) {
+    let result = await db("academy_register_like as r")
       .where("r.student_id", userId)
       .where("is_register", 1)
       .join(TABLE_NAME + " as a", "a.academy_id", "=", "r.academy_id")
       .select("a.*");
+
+    for (let i = 0; i < result.length; i++) {
+      result[i].teacher = await db("user")
+        .select(["user_id", "name", "avatar", "description"])
+        .where("user_id", result[i].teacher_id)
+        .first();
+    }
+    return result;
   },
 
   async addToWatchList(userId, academyId) {
@@ -256,7 +366,7 @@ module.exports = {
       return false;
     }
 
-    return db("academy_register_like as r")
+    let result = await db("academy_register_like as r")
       .join(TABLE_NAME + " as a", "a.academy_id", "=", "r.academy_id")
       .select("a.*")
       .where("a.academy_id", "!=", existAcademy.academy_id)
@@ -265,5 +375,55 @@ module.exports = {
       .groupBy("a.academy_id")
       .orderBy("register", "desc")
       .limit(5);
+
+    for (let i = 0; i < result.length; i++) {
+      result[i].teacher = await db("user")
+        .select(["user_id", "name", "avatar", "description"])
+        .where("user_id", result[i].teacher_id)
+        .first();
+    }
+    return result;
+  },
+
+  //get academy by categoryID
+  async getAcademyByCategoryId(
+    categoryId,
+    page = 1,
+    limit = process.env.LIMIT
+  ) {
+    let existCategory = await db("academy_category")
+      .where("academy_category_id", categoryId)
+      .first();
+    if (!existCategory) {
+      return null;
+    }
+
+    let result;
+    if (existCategory.academy_parent_id !== null) {
+      result = await db("academy")
+        .where("academy_category_id", categoryId)
+        .limit(limit)
+        .offset((page - 1) * limit);
+    } else {
+      result = await db("academy")
+        .whereIn("academy_category_id", function () {
+          this.select("academy_category_id")
+            .from("academy_category")
+            .where("academy_parent_id", existCategory.academy_category_id);
+        })
+        .limit(limit)
+        .offset((page - 1) * limit);
+    }
+    if (result.length <= 0) {
+      return null;
+    }
+
+    for (let i = 0; i < result.length; i++) {
+      result[i].teacher = await db("user")
+        .select(["user_id", "name", "avatar", "description"])
+        .where("user_id", result[i].teacher_id)
+        .first();
+    }
+    return result;
   },
 };
