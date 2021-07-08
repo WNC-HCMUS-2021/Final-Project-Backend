@@ -88,28 +88,33 @@ module.exports = {
     return db("user").where("username", username).update("password", password);
   },
 
-  async registerAcademy(username, academy_id) {
-    let academy = await db("academy")
-      .where("academy_id", academy_id)
-      .where("is_delete", 0)
-      .first();
-    if (!academy) {
-      return academy;
-    }
-
+  async registerAcademy(username, listAcademy) {
     let user = await this.singleByUserName(username);
 
-    let isRegisterAcademy = await db("academy_register_like")
-      .where("student_id", user.user_id)
-      .where("academy_id", academy_id)
-      .where("is_register", 1)
-      .first();
+    let totalPrice = 0;
 
-    if (isRegisterAcademy) {
-      return "registered";
+    for (let i = 0; i < listAcademy.length; i++) {
+      let academy = await db("academy")
+        .where("academy_id", listAcademy[i].academy_id)
+        .where("is_delete", 0)
+        .first();
+      if (!academy) {
+        return academy;
+      }
+
+      let isRegisterAcademy = await db("academy_register_like")
+        .where("student_id", user.user_id)
+        .where("academy_id", listAcademy[i].academy_id)
+        .where("is_register", 1)
+        .first();
+
+      if (isRegisterAcademy) {
+        return "registered_" + academy.academy_name;
+      }
+      totalPrice += academy.price;
     }
 
-    if (academy.price > user.money) {
+    if (totalPrice > user.money) {
       return "do not have enough money";
     }
 
@@ -117,17 +122,19 @@ module.exports = {
     try {
       await db("user")
         .where("username", username)
-        .update({ money: user.money - academy.price });
+        .update({ money: user.money - totalPrice });
 
-      await db("academy_register_like").insert({
-        student_id: user.user_id,
-        academy_id: academy_id,
-        is_register: 1,
-      });
+      for (let i = 0; i < listAcademy.length; i++) {
+        await db("academy_register_like").insert({
+          student_id: user.user_id,
+          academy_id: listAcademy[i].academy_id,
+          is_register: 1,
+        });
 
-      await db("academy")
-        .where("academy_id", academy_id)
-        .update({ register: academy.register + 1 });
+        await db("academy")
+          .where("academy_id", listAcademy[i].academy_id)
+          .update({ register: db.raw("?? + 1", ["register"]) });
+      }
 
       return true;
     } catch (error) {

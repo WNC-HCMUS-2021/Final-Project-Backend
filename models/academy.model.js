@@ -23,12 +23,16 @@ module.exports = {
 
   // get one
   async single(id) {
-    const item = await db(TABLE_NAME).where(PRIMARY_KEY, id);
+    const item = await db(TABLE_NAME).where(PRIMARY_KEY, id).first();
 
+    item.teacher = await db("user")
+      .select(["user_id", "name", "avatar", "description"])
+      .where("user_id", item.teacher_id)
+      .first();
     if (item.length === 0) {
       return null;
     }
-    return item[0];
+    return item;
   },
 
   //get outline

@@ -17,6 +17,13 @@ router.get("/", async function (req, res) {
   res.json(list);
 });
 
+router.get("/profile", auth, async function (req, res) {
+  const list = await userModel.singleByUserName(
+    req.accessTokenPayload.username
+  );
+  res.json(list);
+});
+
 const userSchema = require("../schema/user.json");
 router.post(
   "/register",
@@ -181,18 +188,19 @@ router.post(
   auth,
   require("../middlewares/validate.mdw")(userSchema.registerAcademy),
   async function (req, res) {
-    let { academy_id } = req.body;
+    let listAcademy = req.body;
 
     let result = await userModel.registerAcademy(
       req.accessTokenPayload.username,
-      academy_id
+      listAcademy.listAcademy
     );
+
     if (result === true) {
       return successResponse(res, "Success");
-    } else if (result === "registered") {
+    } else if (result && result.indexOf("registered_") === 0) {
       return successResponse(
         res,
-        "You have registered before",
+        `You have registered "${result.slice("registered_".length)}" before`,
         null,
         400,
         false
