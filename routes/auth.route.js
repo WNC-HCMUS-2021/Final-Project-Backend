@@ -10,6 +10,8 @@ const userModel = require("../models/user.model");
 const router = express.Router();
 const { successResponse } = require("../middlewares/success-response.mdw");
 
+const TIME_EXPIRED_TOKEN = 10 * 60;
+
 router.post("/", async function (req, res) {
   const user = await userModel.singleByUserName(req.body.username);
   if (user === null) {
@@ -27,7 +29,7 @@ router.post("/", async function (req, res) {
     role: user.role,
   };
   const opts = {
-    expiresIn: 10 * 60, // seconds
+    expiresIn: TIME_EXPIRED_TOKEN, // seconds
   };
   const accessToken = jwt.sign(payload, process.env.SECRET_KEY, opts);
 
@@ -45,15 +47,25 @@ router.post("/verify/:token", async function (req, res) {
 
 router.post("/refresh", async function (req, res) {
   const { accessToken, refreshToken } = req.body;
-  const { userId } = jwt.verify(accessToken, process.env.SECRET_KEY, {
+
+  const user = jwt.verify(accessToken, process.env.SECRET_KEY, {
     ignoreExpiration: true,
   });
 
-  const ret = await userModel.isValidRFToken(userId, refreshToken);
+  const ret = await userModel.isValidRFToken(user.userId, refreshToken);
   if (ret === true) {
-    const newAccessToken = jwt.sign({ userId }, process.env.SECRET_KEY, {
-      expiresIn: 10 * 60,
-    });
+    const newAccessToken = jwt.sign(
+      {
+        userId: user.userId,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+      process.env.SECRET_KEY,
+      {
+        expiresIn: TIME_EXPIRED_TOKEN,
+      }
+    );
     return successResponse(res, "Success", { accessToken: newAccessToken });
   }
   return successResponse(res, "Refresh token is revoked!", null, 400, false);
