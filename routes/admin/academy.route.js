@@ -1,7 +1,7 @@
 const express = require('express');
 const academyModel = require('../../models/academy.model');
 const router = express.Router();
-
+const schema = require('../../schema/academy.json');
 const { successResponse } = require('../../middlewares/success-response.mdw');
 
 // Lấy tất cả khoá học
@@ -31,5 +31,30 @@ router.delete('/:id', async function (req, res) {
   successResponse(res, 'Delete data success', result);
 })
 
+// Giáo viên thêm khoá học mới
+router.post('/', require('../../middlewares/validate.mdw')(schema.create), async function (req, res) {
+  let academy = req.body;
+  // check user_id phải có role là giáo viên
+
+  // thêm khoá học
+  academy.created_at = new Date(req.body.created_at);
+  const ids = await academyModel.add(category); // thêm khoá học
+  academy.academy_id = ids[0];
+
+  // thêm chi tiết nội dung khoá học
+  successResponse(res, "Create data success", cateacademygory, 201);
+});
+
+// Giáo viên cập nhật khoá học
+router.patch('/:id', require('../../middlewares/validate.mdw')(schema.update), async function (req, res) {
+  const id = req.params.id
+  // check user_id phải có role là giáo viên
+
+  // update thông tin khoá học
+
+  // update nội dung khoá học
+
+  successResponse(res, "Update data success", result, 200);
+})
 
 module.exports = router;
