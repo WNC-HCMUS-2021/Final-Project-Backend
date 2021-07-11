@@ -3,6 +3,7 @@ const academyModel = require('../../models/academy.model');
 const router = express.Router();
 const schema = require('../../schema/academy.json');
 const { successResponse } = require('../../middlewares/success-response.mdw');
+const userModel = require('../../models/user.model');
 
 // Lấy tất cả khoá học
 router.get('/', async function (req, res) {
@@ -35,6 +36,11 @@ router.delete('/:id', async function (req, res) {
 router.post('/', require('../../middlewares/validate.mdw')(schema.create), async function (req, res) {
   let academy = req.body;
   // check user_id phải có role là giáo viên
+  let user_id = academy.teacher_id;
+  let user = userModel.getDetailUser(user_id);
+  if (user.role !== 'teacher') {
+    successResponse(res, 'No permission', null, 403, false);
+  }
 
   // thêm khoá học
   academy.created_at = new Date(req.body.created_at);
@@ -42,7 +48,7 @@ router.post('/', require('../../middlewares/validate.mdw')(schema.create), async
   academy.academy_id = ids[0];
 
   // thêm chi tiết nội dung khoá học
-  successResponse(res, "Create data success", cateacademygory, 201);
+  successResponse(res, "Create data success", academy, 201);
 });
 
 // Giáo viên cập nhật khoá học
