@@ -358,6 +358,14 @@ module.exports = {
   async getRateAcademy(academy_id) {
     const listRate = await db("academy_rate").where("academy_id", academy_id);
 
+    for (let i = 0; i < listRate.length; i++) {
+      listRate[i].student = await db("user")
+        .select(["user_id", "username", "name", "avatar"])
+        .where("user_id", listRate[i].student_id)
+        .where("is_delete", 0)
+        .first();
+    }
+
     if (listRate.length <= 0) {
       return null;
     }
