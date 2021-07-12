@@ -65,8 +65,10 @@ module.exports = {
   async isValidRFToken(id, rfToken) {
     const list = await db("user")
       .where("user_id", id)
-      .andWhere("refresh_token", rfToken);
-    if (list.length > 0) {
+      .andWhere("refresh_token", rfToken)
+      .first();
+
+    if (list) {
       return true;
     }
 
