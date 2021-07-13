@@ -122,6 +122,18 @@ module.exports = {
   ) {
     let rawQuery = `SELECT * FROM academy as a where MATCH(academy_name) AGAINST('${keyword}' IN NATURAL LANGUAGE MODE) > 0`;
 
+    let totalQuery = await db.raw(rawQuery);
+    totalQuery = totalQuery[0].length;
+
+    let result = {};
+    result.pages =
+      Math.floor(totalQuery / limit) + (totalQuery % limit > 0 ? 1 : 0);
+
+    if (page > result.pages) {
+      page = result.pages;
+    }
+    result.page = parseInt(page);
+
     if (category) {
       let temp = await db("academy_category")
         .where("academy_category_id", category)
@@ -146,27 +158,31 @@ module.exports = {
       rawQuery += ` ORDER BY a.rate ${rate} LIMIT ${limit} OFFSET ${
         (page - 1) * limit
       } `;
-      return db.raw(rawQuery);
+      let temp = await db.raw(rawQuery);
+      for (let i = 0; i < temp[0].length; i++) {
+        temp[0][i].teacher = await db("user")
+          .select(["user_id", "name", "avatar", "description"])
+          .where("user_id", temp[0][i].teacher_id)
+          .first();
+      }
+      result.listAcademy = temp[0];
+      return result;
     }
 
     if (price && (price == "desc" || price == "asc")) {
       rawQuery += ` ORDER BY a.price ${price} LIMIT ${limit} OFFSET ${
         (page - 1) * limit
       } `;
-      return db.raw(rawQuery);
+      let temp = await db.raw(rawQuery);
+      for (let i = 0; i < temp[0].length; i++) {
+        temp[0][i].teacher = await db("user")
+          .select(["user_id", "name", "avatar", "description"])
+          .where("user_id", temp[0][i].teacher_id)
+          .first();
+      }
+      result.listAcademy = temp[0];
+      return result;
     }
-
-    let totalQuery = await db.raw(rawQuery);
-    totalQuery = totalQuery[0].length;
-
-    let result = {};
-    result.pages =
-      Math.floor(totalQuery / limit) + (totalQuery % limit > 0 ? 1 : 0);
-
-    if (page > result.pages) {
-      page = result.pages;
-    }
-    result.page = parseInt(page);
 
     rawQuery += ` ORDER BY a.rate desc LIMIT ${limit} OFFSET ${
       (page - 1) * limit
