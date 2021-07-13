@@ -156,24 +156,35 @@ module.exports = {
       return db.raw(rawQuery);
     }
 
+    let totalQuery = await db.raw(rawQuery);
+    totalQuery = totalQuery[0].length;
+
+    let result = {};
+    result.pages =
+      Math.floor(totalQuery / limit) + (totalQuery % limit > 0 ? 1 : 0);
+
+    if (page > result.pages) {
+      page = result.pages;
+    }
+    result.page = parseInt(page);
+
     rawQuery += ` ORDER BY a.rate desc LIMIT ${limit} OFFSET ${
       (page - 1) * limit
     } `;
 
-    let result = await db.raw(rawQuery);
-    for (let i = 0; i < result[0].length; i++) {
-      result[0][i].teacher = await db("user")
+    let temp = await db.raw(rawQuery);
+    for (let i = 0; i < temp[0].length; i++) {
+      temp[0][i].teacher = await db("user")
         .select(["user_id", "name", "avatar", "description"])
-        .where("user_id", result[0][i].teacher_id)
+        .where("user_id", temp[0][i].teacher_id)
         .first();
     }
+    result.listAcademy = temp[0];
     return result;
   },
 
   async getAll(category, rate, price, page = 1, limit = process.env.LIMIT) {
-    let query = db(TABLE_NAME)
-      .limit(limit)
-      .offset((page - 1) * limit);
+    let query = db(TABLE_NAME);
 
     if (category) {
       let temp = await db("academy_category")
@@ -192,36 +203,76 @@ module.exports = {
         query.where("academy_category_id", category);
       }
     }
-    let result;
+    let result = {};
     if (rate && (rate == "desc" || rate == "asc")) {
-      result = await query.orderBy("rate", rate);
+      result.pages = await query.orderBy("rate", rate);
+      result.pages =
+        Math.floor(result.pages.length / limit) +
+        (result.pages.length % limit > 0 ? 1 : 0);
 
-      for (let i = 0; i < result.length; i++) {
-        result[i].teacher = await db("user")
+      if (page > result.pages) {
+        page = result.pages;
+      }
+      result.page = parseInt(page);
+
+      result.listAcademy = await query
+        .orderBy("rate", rate)
+        .limit(limit)
+        .offset((page - 1) * limit);
+
+      for (let i = 0; i < result.listAcademy.length; i++) {
+        result.listAcademy[i].teacher = await db("user")
           .select(["user_id", "name", "avatar", "description"])
-          .where("user_id", result[i].teacher_id)
+          .where("user_id", result.listAcademy[i].teacher_id)
           .first();
       }
       return result;
     }
 
     if (price && (price == "desc" || price == "asc")) {
-      result = await query.orderBy("price", price);
+      result.pages = await query.orderBy("price", price);
+      result.pages =
+        Math.floor(result.pages.length / limit) +
+        (result.pages.length % limit > 0 ? 1 : 0);
 
-      for (let i = 0; i < result.length; i++) {
-        result[i].teacher = await db("user")
+      if (page > result.pages) {
+        page = result.pages;
+      }
+      result.page = parseInt(page);
+
+      result.listAcademy = await query
+        .orderBy("price", price)
+        .limit(limit)
+        .offset((page - 1) * limit);
+
+      for (let i = 0; i < result.listAcademy.length; i++) {
+        result.listAcademy[i].teacher = await db("user")
           .select(["user_id", "name", "avatar", "description"])
-          .where("user_id", result[i].teacher_id)
+          .where("user_id", result.listAcademy[i].teacher_id)
           .first();
       }
       return result;
     }
 
-    result = await query.orderBy("rate", "desc");
-    for (let i = 0; i < result.length; i++) {
-      result[i].teacher = await db("user")
+    result.pages = await query.orderBy("price", price);
+    result.pages =
+      Math.floor(result.pages.length / limit) +
+      (result.pages.length % limit > 0 ? 1 : 0);
+
+    if (page > result.pages) {
+      page = result.pages;
+    }
+    result.page = parseInt(page);
+
+    result.listAcademy = await query
+      .orderBy("rate", "desc")
+      .limit(limit)
+      .offset((page - 1) * limit);
+
+    for (let i = 0; i < result.listAcademy.length; i++) {
+      result.listAcademy[i].teacher = await db("user")
         .select(["user_id", "name", "avatar", "description"])
-        .where("user_id", result[i].teacher_id)
+        .where("user_id", result.listAcademy[i].teacher_id)
         .first();
     }
     return result;

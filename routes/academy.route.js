@@ -89,7 +89,8 @@ router.get("/search", async function (req, res) {
       page,
       limit
     );
-    return successResponse(res, "Success", list[0]);
+
+    return successResponse(res, "Success", list);
   }
 });
 
