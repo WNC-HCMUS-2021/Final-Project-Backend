@@ -93,8 +93,6 @@ module.exports = {
   async registerAcademy(username, listAcademy) {
     let user = await this.singleByUserName(username);
 
-    let totalPrice = 0;
-
     for (let i = 0; i < listAcademy.length; i++) {
       let academy = await db("academy")
         .where("academy_id", listAcademy[i].academy_id)
@@ -113,19 +111,10 @@ module.exports = {
       if (isRegisterAcademy) {
         return "registered_" + academy.academy_name;
       }
-      totalPrice += academy.price;
-    }
-
-    if (totalPrice > user.money) {
-      return "do not have enough money";
     }
 
     var t = await db.transaction();
     try {
-      await db("user")
-        .where("username", username)
-        .update({ money: user.money - totalPrice });
-
       for (let i = 0; i < listAcademy.length; i++) {
         await db("academy_register_like").insert({
           student_id: user.user_id,
