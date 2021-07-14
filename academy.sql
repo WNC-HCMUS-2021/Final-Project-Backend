@@ -121,6 +121,7 @@ CREATE TABLE `user`  (
   `role` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'student',
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_verify` tinyint(1) NOT NULL DEFAULT 0,
+  `code` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `created_at` timestamp(0) NULL DEFAULT current_timestamp(0),
   `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`user_id`) USING BTREE

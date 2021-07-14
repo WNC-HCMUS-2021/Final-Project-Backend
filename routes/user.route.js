@@ -47,31 +47,21 @@ router.post(
     }
 
     user.password = bcrypt.hashSync(user.password, 10);
+    user.code = randomstring.generate(20);
 
     const ids = await userModel.add(user);
+    await userModel.sendConfirmMail(user.username);
+
     user.user_id = ids[0];
 
-    const payload = {
-      userId: user.user_id,
-      username: user.username,
-      email: user.email,
-      role: "student",
-    };
-    const opts = {
-      expiresIn: 10 * 60, // seconds
-    };
-    const accessToken = jwt.sign(payload, process.env.SECRET_KEY, opts);
-
-    const refreshToken = randomstring.generate(80);
-    console.log(payload);
-    await userModel.patchRFToken(user.user_id, refreshToken);
-    return successResponse(res, "Success", {
-      authenticated: true,
-      accessToken,
-      refreshToken,
-    });
+    return successResponse(res, "Success");
   }
 );
+
+router.get("/resend-confirm-email", auth, async function (req, res) {
+  await userModel.sendConfirmMail(req.accessTokenPayload.username);
+  return successResponse(res, "Gửi thành công!");
+});
 
 router.put(
   "/update-profile",

@@ -27,6 +27,7 @@ router.post("/", async function (req, res) {
     username: user.username,
     email: user.email,
     role: user.role,
+    isVerify: user.is_verify,
   };
   const opts = {
     expiresIn: TIME_EXPIRED_TOKEN, // seconds
@@ -38,11 +39,28 @@ router.post("/", async function (req, res) {
   return successResponse(res, "Success", { accessToken, refreshToken });
 });
 
-router.post("/verify/:token", async function (req, res) {
-  let token = await jwt.verify(req.params.token, process.env.SECRET_KEY);
+router.post("/verify/:userId/:code", async function (req, res) {
+  let userId = req.params.userId;
+  let code = req.params.code;
+  let result = await userModel.verifyEmail(userId, code);
 
-  await userModel.verifyEmail(token.userId);
-  return successResponse(res, "Success");
+  const user = await userModel.singleByUserId(userId);
+  const payload = {
+    userId: user.user_id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    isVerify: user.is_verify,
+  };
+  const opts = {
+    expiresIn: TIME_EXPIRED_TOKEN, // seconds
+  };
+  const accessToken = jwt.sign(payload, process.env.SECRET_KEY, opts);
+
+  if (result) {
+    return successResponse(res, "Success", accessToken);
+  }
+  return successResponse(res, "Validation failed", null, 400, false);
 });
 
 router.post("/refresh", async function (req, res) {
@@ -60,6 +78,7 @@ router.post("/refresh", async function (req, res) {
         username: user.username,
         email: user.email,
         role: user.role,
+        isVerify: user.is_verify,
       },
       process.env.SECRET_KEY,
       {
