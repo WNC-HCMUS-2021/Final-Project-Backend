@@ -8,22 +8,22 @@
             "description_short",
             "created_at"
         ],
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
             "academy_category_id": { "type": "integer" },
             "academy_name": { "type": "string" },
             "price": { "type": "number" },
             "teacher_id": { "type": "integer" },
-            "description_short": { "type": "string" },
+            "description_short": { "type": "string", "minLength": 10 },
             "created_at": { "type": "integer" }
         }
     },
   
     "update": {
         "required": [
-            "academy_id"
-          ],
-        "additionalProperties": false,
+            "teacher_id"
+        ],
+        "additionalProperties": true,
         "properties": {
             "academy_id": { "type": "integer" },
             "academy_category_id": { "type": "integer" },

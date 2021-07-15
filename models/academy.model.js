@@ -505,4 +505,20 @@ module.exports = {
     }
     return result;
   },
+
+  
+  // ======================================== ADMIN: by NNM =====================================
+  add(academy) {
+    return db(TABLE_NAME).insert(academy);
+  },
+
+  // edit
+  async edit(id, academy) {
+    return db(TABLE_NAME).where(PRIMARY_KEY, id).update(academy);
+  },
+
+  
 };
+
+
+

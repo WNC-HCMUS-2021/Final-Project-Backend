@@ -138,3 +138,6 @@ ALTER TABLE `user`
 ADD COLUMN `is_delete` tinyint(1) NULL DEFAULT 0 COMMENT '0: chưa xoá, 1: đã xoá' AFTER `role`;
 
 ALTER TABLE academy ADD FULLTEXT(academy_name)
+
+ALTER TABLE `academy` 
+MODIFY COLUMN `status` tinyint(1) NULL DEFAULT 0 COMMENT '0: Chưa hoàn thành, 1: Đã hoàn thành' AFTER `price`;
