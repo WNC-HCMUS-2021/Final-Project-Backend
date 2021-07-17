@@ -32,6 +32,7 @@ app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/user", require("./routes/user.route"));
 app.use("/api/academy", require("./routes/academy.route"));
 app.use("/api/category", require("./routes/academy-category.route"));
+app.use("/api/outline", require("./routes/academy-outline.route"));
 
 // Routes For admin
 app.use(

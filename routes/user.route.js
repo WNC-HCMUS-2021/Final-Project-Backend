@@ -134,6 +134,18 @@ router.post("/watch-list/:id", auth, async function (req, res) {
     req.accessTokenPayload.userId,
     id
   );
+  if (result === "exist") {
+    return successResponse(
+      res,
+      "This course is already on the watch list",
+      null,
+      400,
+      false
+    );
+  }
+  if (result === "notFound") {
+    return successResponse(res, "Invalid category", null, 400, false);
+  }
   if (result) {
     return successResponse(res, "Success");
   }

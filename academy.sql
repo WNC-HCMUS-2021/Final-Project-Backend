@@ -82,6 +82,7 @@ CREATE TABLE `academy_outline`  (
   `title` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Tiêu đề chương học',
   `url_video` text NOT NULL COMMENT 'URL video',
   `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nội dung',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Mô tả khoá học',
   `created_at` timestamp(0) NULL DEFAULT current_timestamp(0),
   `updated_at` timestamp(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`academy_outline_id`) USING BTREE
