@@ -15,15 +15,16 @@ module.exports = {
       .limit(limit)
       .offset((page - 1) * limit);
 
-    if (listAcademy.length <= 0) {
-      return null;
-    }
     return listAcademy;
   },
 
   // get one
   async single(id) {
     const item = await db(TABLE_NAME).where(PRIMARY_KEY, id).first();
+
+    if (!item) {
+      return false;
+    }
 
     item.teacher = await db("user")
       .select(["user_id", "name", "avatar", "description"])
@@ -39,10 +40,6 @@ module.exports = {
   async getOutline(academy_id) {
     const list = await db("academy_outline").where("academy_id", academy_id);
 
-    if (list.length === 0) {
-      return null;
-    }
-
     return list;
   },
 
@@ -52,9 +49,7 @@ module.exports = {
       "academy_category_id",
       categoryId
     );
-    if (result.length <= 0) {
-      return null;
-    }
+
     return result;
   },
 
@@ -328,6 +323,21 @@ module.exports = {
 
   async addToWatchList(userId, academyId) {
     let result = await this.single(academyId);
+
+    if (!result) {
+      return "notFound";
+    }
+
+    let existWatchList = await db("academy_register_like")
+      .where("student_id", userId)
+      .where("academy_id", academyId)
+      .where("is_like", 1)
+      .first();
+
+    if (existWatchList) {
+      return "exist";
+    }
+
     if (result) {
       return db("academy_register_like").insert({
         student_id: userId,
@@ -432,10 +442,6 @@ module.exports = {
         .where("is_delete", 0)
         .first();
     }
-
-    if (listRate.length <= 0) {
-      return null;
-    }
     return listRate;
   },
 
@@ -493,9 +499,6 @@ module.exports = {
         .limit(limit)
         .offset((page - 1) * limit);
     }
-    if (result.length <= 0) {
-      return null;
-    }
 
     for (let i = 0; i < result.length; i++) {
       result[i].teacher = await db("user")
@@ -506,7 +509,6 @@ module.exports = {
     return result;
   },
 
-  
   // ======================================== ADMIN: by NNM =====================================
   add(academy) {
     return db(TABLE_NAME).insert(academy);
@@ -516,9 +518,4 @@ module.exports = {
   async edit(id, academy) {
     return db(TABLE_NAME).where(PRIMARY_KEY, id).update(academy);
   },
-
-  
 };
-
-
-
