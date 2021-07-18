@@ -1,10 +1,14 @@
 const express = require('express');
 const bcrypt = require("bcryptjs");
 const userModel = require('../../models/user.model');
+const academyModel = require('../../models/academy.model');
 const schema = require('../../schema/teacher.json');
 const router = express.Router();
 
 const { successResponse } = require('../../middlewares/success-response.mdw');
+
+const ROLE_TEACHER = 'teacher';
+const ROLE_ADMIN = 'admin';
 
 // lấy tất cả giáo viên, học viên
 router.get('/', async function (req, res) {
@@ -30,6 +34,12 @@ router.get('/:id', async function (req, res) {
 
 // thêm giáo viên
 router.post('/', require('../../middlewares/validate.mdw')(schema.create), async function (req, res) {
+    // check role: admin mới được thêm
+    if (req.accessTokenPayload.role !== ROLE_ADMIN) {
+        successResponse(res, 'No permission', null, 403, false);
+    }
+
+    // get data -> insert
     const teacher = req.body;
     teacher.password = bcrypt.hashSync(teacher.password, 10);
     teacher.role = 'teacher';
@@ -43,6 +53,11 @@ router.post('/', require('../../middlewares/validate.mdw')(schema.create), async
 
 // chỉnh sửa giáo viên
 router.put('/', require('../../middlewares/validate.mdw')(schema.update), async function (req, res) {
+    // check role: teacher mới được chỉnh sửa
+    if (req.accessTokenPayload.role !== ROLE_TEACHER) {
+        successResponse(res, 'No permission', null, 403, false);
+    }
+
     const user = req.body;
     // check xem body có username, email, password hay không
     delete user.password; delete user.username; delete user.email;
@@ -71,6 +86,20 @@ router.delete('/:id', async function (req, res) {
     const id = req.params.id;
     const result = await userModel.deleteUser(id);
     successResponse(res, "Delete data success", result, 200);
+});
+
+// giáo viên lấy danh sách khoá học mình dạy và đăng tải
+router.get('/:id/academy', async function (req, res) {
+    const teacher_id = req.params.id || 0;
+    // check xem phải role teacher không
+    let teacher = await userModel.getDetailUser(teacher_id);
+    if (teacher.role !== ROLE_TEACHER) {
+      successResponse(res, 'No permission', null, 403, false);
+    }
+    // lấy danh sách
+    let listAcademy = await academyModel.getAcademyByTeacherId(teacher_id);
+
+    successResponse(res, 'Query data success', listAcademy);
 })
 
 module.exports = router;

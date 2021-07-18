@@ -518,4 +518,10 @@ module.exports = {
   async edit(id, academy) {
     return db(TABLE_NAME).where(PRIMARY_KEY, id).update(academy);
   },
+
+  // danh sách khoá học của giáo viên
+  async getAcademyByTeacherId(teacher_id) {
+    return await db(TABLE_NAME)
+      .where(`${TABLE_NAME}.teacher_id`, teacher_id);
+  }
 };
