@@ -78,7 +78,7 @@ router.post("/refresh", async function (req, res) {
         username: user.username,
         email: user.email,
         role: user.role,
-        isVerify: user.is_verify,
+        isVerify: user.isVerify,
       },
       process.env.SECRET_KEY,
       {
