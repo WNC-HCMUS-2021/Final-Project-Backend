@@ -125,7 +125,7 @@ module.exports = {
       Math.floor(totalQuery / limit) + (totalQuery % limit > 0 ? 1 : 0);
 
     if (page > result.pages) {
-      page = result.pages;
+      page = result.pages === 0 ? page : result.pages;
     }
     result.page = parseInt(page);
 
