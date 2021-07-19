@@ -88,6 +88,13 @@ router.put(
   }
 );
 
+router.post("/avatar", auth, async function (req, res) {
+  let avatar = req.body.avatar;
+  await userModel.changeAvatar(req.accessTokenPayload.username, avatar);
+
+  return successResponse(res, "Cập nhật thành công");
+});
+
 router.put(
   "/change-password",
   auth,

@@ -106,6 +106,10 @@ module.exports = {
     return db("user").where("username", username).update("password", password);
   },
 
+  async changeAvatar(username, avatar) {
+    return db("user").where("username", username).update("avatar", avatar);
+  },
+
   async registerAcademy(username, listAcademy) {
     let user = await this.singleByUserName(username);
 
