@@ -134,7 +134,7 @@ module.exports = {
         .where("academy_category_id", category)
         .first();
       if (!temp) {
-        return null;
+        return [];
       }
 
       if (!temp.academy_parent_id) {
@@ -202,7 +202,7 @@ module.exports = {
         .where("academy_category_id", category)
         .first();
       if (!temp) {
-        return null;
+        return [];
       }
       if (!temp.academy_parent_id) {
         query.whereIn("academy_category_id", function () {
@@ -448,19 +448,15 @@ module.exports = {
   async related(academy_id) {
     let existAcademy = await this.single(academy_id);
     if (!existAcademy) {
-      return false;
+      return [];
     }
 
-    let result = await db("academy_register_like as r")
-      .join(TABLE_NAME + " as a", "a.academy_id", "=", "r.academy_id")
+    let result = await db("academy as a")
       .select("a.*")
       .where("a.academy_id", "!=", existAcademy.academy_id)
       .where("a.academy_category_id", existAcademy.academy_category_id)
-      .count("r.academy_id as register")
-      .groupBy("a.academy_id")
-      .orderBy("register", "desc")
+      .orderBy("a.register", "desc")
       .limit(5);
-
     for (let i = 0; i < result.length; i++) {
       result[i].teacher = await db("user")
         .select(["user_id", "name", "avatar", "description"])
@@ -521,7 +517,6 @@ module.exports = {
 
   // danh sách khoá học của giáo viên
   async getAcademyByTeacherId(teacher_id) {
-    return await db(TABLE_NAME)
-      .where(`${TABLE_NAME}.teacher_id`, teacher_id);
-  }
+    return await db(TABLE_NAME).where(`${TABLE_NAME}.teacher_id`, teacher_id);
+  },
 };
