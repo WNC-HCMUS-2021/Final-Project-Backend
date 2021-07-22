@@ -222,7 +222,7 @@ module.exports = {
         (result.pages.length % limit > 0 ? 1 : 0);
 
       if (page > result.pages) {
-        page = result.pages;
+        page = result.pages === 0 ? 1 : result.pages;
       }
       result.page = parseInt(page);
 
@@ -247,7 +247,7 @@ module.exports = {
         (result.pages.length % limit > 0 ? 1 : 0);
 
       if (page > result.pages) {
-        page = result.pages;
+        page = result.pages === 0 ? 1 : result.pages;
       }
       result.page = parseInt(page);
 
@@ -271,7 +271,7 @@ module.exports = {
       (result.pages.length % limit > 0 ? 1 : 0);
 
     if (page > result.pages) {
-      page = result.pages;
+      page = result.pages === 0 ? 1 : result.pages;
     }
     result.page = parseInt(page);
 

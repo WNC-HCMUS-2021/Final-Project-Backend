@@ -14,10 +14,22 @@ module.exports = {
   },
 
   //get
-  async getOutlineById(academy_outline_id) {
+  async getOutlineById(userId, academy_outline_id) {
     let outline = await db(TABLE_NAME)
       .where(PRIMARY_KEY, academy_outline_id)
       .first();
+
+    let existRegister = await db("academy_register_like")
+      .where("student_id", userId)
+      .where("academy_id", outline.academy_id)
+      .where("is_register", 1)
+      .first();
+    if (!existRegister) {
+      console.log("abcd");
+      return false;
+    }
+    console.log(existRegister);
+
     outline.teacher = await db("academy as a")
       .join("user as u", "a.teacher_id", "=", "u.user_id")
       .select(["u.user_id", "u.name", "u.avatar"])
