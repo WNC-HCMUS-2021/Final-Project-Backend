@@ -10,8 +10,11 @@ module.exports = {
   // get all by filter
   async all(page = 1, limit = LIMIT, sort = SORT_TYPE) {
     const listAcademy = await db(TABLE_NAME)
-      .where(`is_delete`, NOT_DELETE)
-      .orderBy(`${PRIMARY_KEY}`, sort)
+      .join("academy_category as ac", `${TABLE_NAME}.academy_category_id`, "=", "ac.academy_category_id")
+      .join("user", `${TABLE_NAME}.teacher_id`, "=", "user.user_id")
+      .where(`${TABLE_NAME}.is_delete`, NOT_DELETE)
+      .select(`${TABLE_NAME}.*`, "user.name as teacher_name", "ac.academy_category_name")
+      .orderBy(`${TABLE_NAME}.${PRIMARY_KEY}`, sort)
       .limit(limit)
       .offset((page - 1) * limit);
 

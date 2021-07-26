@@ -187,6 +187,7 @@ module.exports = {
     const listTeacher = await db(TABLE_NAME)
       .where("role", role)
       .where("is_delete", NOT_DELETE)
+      .select(['user_id', 'avatar', 'name', 'username', 'email', 'phone_number', 'birthday', 'gender', 'money', 'is_delete', 'created_at'])
       .orderBy(`${PRIMARY_KEY}`, sort)
       .limit(limit)
       .offset((page - 1) * limit);

@@ -41,7 +41,14 @@ router.patch('/:id', require('../../middlewares/validate.mdw')(schema.update), a
     const id = req.params.id
     const category = req.body;
     const result = await categoryModel.edit(id, category);
-    successResponse(res, "Update data success", result, 201);
+    if (result) {
+        // lấy data
+        var item = await categoryModel.single(id);
+        successResponse(res, "Update data success", item, 200);
+    } else {
+        successResponse(res, "Update data fail", result, 400, false);
+    }
+
 })
 
 // xoá danh mục: Không được xoá danh mục đã có khoá học
