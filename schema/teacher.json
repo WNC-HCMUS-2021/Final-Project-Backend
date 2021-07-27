@@ -10,7 +10,7 @@
       "birthday",
       "gender"
     ],
-    "additionalProperties": false,
+    "additionalProperties": true,
     "properties": {
       "username": { "type": "string" },
       "password": {

@@ -37,18 +37,19 @@ router.post('/', require('../../middlewares/validate.mdw')(schema.create), async
     // check role: admin mới được thêm
     if (req.accessTokenPayload.role !== ROLE_ADMIN) {
         successResponse(res, 'No permission', null, 403, false);
+    } else {
+        // get data -> insert
+        const teacher = req.body;
+        teacher.password = bcrypt.hashSync(teacher.password, 10);
+        teacher.role = 'teacher';
+        teacher.created_at = new Date(teacher.created_at);
+
+        const ids = await userModel.addTeacher(teacher);
+        teacher.id = ids[0];
+        delete teacher.password;
+
+        successResponse(res, 'Create data success', teacher, 201);
     }
-
-    // get data -> insert
-    const teacher = req.body;
-    teacher.password = bcrypt.hashSync(teacher.password, 10);
-    teacher.role = 'teacher';
-
-    const ids = await userModel.addTeacher(teacher);
-    teacher.id = ids[0];
-    delete teacher.password;
-
-    successResponse(res, 'Create data success', teacher, 201);
 });
 
 // chỉnh sửa giáo viên
@@ -94,7 +95,7 @@ router.get('/:id/academy', async function (req, res) {
     // check xem phải role teacher không
     let teacher = await userModel.getDetailUser(teacher_id);
     if (teacher.role !== ROLE_TEACHER) {
-      successResponse(res, 'No permission', null, 403, false);
+        successResponse(res, 'No permission', null, 403, false);
     }
     // lấy danh sách
     let listAcademy = await academyModel.getAcademyByTeacherId(teacher_id);
