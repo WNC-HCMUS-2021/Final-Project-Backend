@@ -38,4 +38,11 @@ module.exports = {
 
     return outline;
   },
+
+
+  // get all outline of academy
+  async getDetailOutlineByAcademyId(academyId) {
+    return await db(TABLE_NAME)
+    .where('academy_id', academyId);
+  }
 };

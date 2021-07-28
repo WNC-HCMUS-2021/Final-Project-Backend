@@ -522,4 +522,13 @@ module.exports = {
   async getAcademyByTeacherId(teacher_id) {
     return await db(TABLE_NAME).where(`${TABLE_NAME}.teacher_id`, teacher_id);
   },
+
+  // chi tiết khoá học
+  async getDetailAcademy(id) {
+    return db(TABLE_NAME)
+    .join("academy_category as ac", `${TABLE_NAME}.academy_category_id`, "=", "ac.academy_category_id")
+    .where(`${TABLE_NAME}.is_delete`, NOT_DELETE)
+    .select(`${TABLE_NAME}.*`, "ac.academy_category_name")
+    .where(`${TABLE_NAME}.${PRIMARY_KEY}`, id);
+  }
 };

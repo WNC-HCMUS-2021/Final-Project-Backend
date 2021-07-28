@@ -6,6 +6,7 @@ const userModel = require('../../models/user.model');
 const schemaAcademy = require('../../schema/academy.json');
 const schemaOutline = require('../../schema/academy-outline.json');
 const { successResponse } = require('../../middlewares/success-response.mdw');
+const e = require('express');
 
 const ROLE_TEACHER = 'teacher';
 
@@ -95,6 +96,24 @@ router.patch('/:academyId/outline/:id', require('../../middlewares/validate.mdw'
   delete outline.created_at;
   const result = await academyOutlineModel.edit(id, outline); // cập nhật nội dung khoá học
   successResponse(res, "Update data success", result, 200);
-})
+});
+
+// Chi tiết khoá học
+router.get('/:academyId', async function (req, res) {
+  // phân trang (page, limit), sắp xếp
+  const academyId = req.params.academyId;
+  var detail = await academyModel.getDetailAcademy(academyId);
+  if (detail) {
+    // get outline
+    const outline = await academyOutlineModel.getDetailOutlineByAcademyId(academyId);
+    let data = {
+      academy: detail[0],
+      outline
+    }
+    successResponse(res, "Query data success", data);
+  } else {
+    successResponse(res, 'No academy exist', null, 404, false);
+  }
+});
 
 module.exports = router;
