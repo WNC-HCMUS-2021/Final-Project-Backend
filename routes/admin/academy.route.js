@@ -75,27 +75,44 @@ router.patch('/:id', require('../../middlewares/validate.mdw')(schemaAcademy.upd
 
 // Giáo viên thêm chi tiết nội dung khoá học
 router.post('/:academyId/outline', require('../../middlewares/validate.mdw')(schemaOutline.create), async function (req, res) {
-  let outline = req.body;
-  outline.academy_id = req.params.academyId;
+  let outline = req.body; // arrray
+  console.log("outline: ", outline);
+
   // check tồn tại academy
 
   // insert
-  outline.created_at = new Date(req.body.created_at);
-  const ids = await academyOutlineModel.add(outline); // thêm khoá học
-  outline.academy_outline_id = ids[0];
-  successResponse(res, "Create data success", outline, 201);
+  if (outline.length > 0) {
+    for (var i = 0; i < outline.length; i++) {
+      outline[i].academy_id = req.params.academyId;
+      outline[i].created_at = new Date();
+    }
+    const ids = await academyOutlineModel.add(outline); // thêm khoá học
+    outline.academy_outline_id = ids[0];
+    successResponse(res, "Create data success", outline, 201);
+  }
+
 });
 
 // Giáo viên cập nhật chi tiết nội dung khoá học
-router.patch('/:academyId/outline/:id', require('../../middlewares/validate.mdw')(schemaOutline.update), async function (req, res) {
-  const id = req.params.id;
-  let outline = req.body;
-  outline.academy_id = req.params.academyId;
+router.patch('/:academyId/outline', require('../../middlewares/validate.mdw')(schemaOutline.update), async function (req, res) {
+  let outline = req.body; // array
 
-  // update
-  delete outline.created_at;
-  const result = await academyOutlineModel.edit(id, outline); // cập nhật nội dung khoá học
-  successResponse(res, "Update data success", result, 200);
+  if (outline.length > 0) {
+    for (var i = 0; i < outline.length; i++) {
+      let outlineAcademyId = outline[i].academy_outline_id;
+      outline[i].academy_id = parseInt(req.params.academyId);
+      let result = await academyOutlineModel.edit(outlineAcademyId, outline[i]); // cập nhật nội dung khoá học
+      if (result === 0) {
+        successResponse(res, "Update data fail", null, 400);
+      }
+    }
+
+    successResponse(res, "Update data success", outline, 200);
+  } else {
+    successResponse(res, "Update data fail", null, 400);
+  }
+
+
 });
 
 // Chi tiết khoá học
