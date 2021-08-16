@@ -8,7 +8,7 @@ const categoryModel = require("../models/academy-category.model");
 
 // Check Facebook Signature
 FB_ACCESS_TOKEN =
-  "EAACnjNy2ZB0UBAFZAEd3ddYqH18RBm3Pm91FjZAv5xAW49ZBZCJprooLDN0lDFs7boYLpBniSnbKfTcu4RBVXKx3FNj1pXLXWov5zZAZC0GZAWwbvq31MBDwusIUsmsyM8gnBN1TxeQCJtrWHpa6fxvp4ZAXpVQhbyaoViVBzOE0379coDQDVvIquROCVYRnytln7HA8fGjOpewZDZD";
+  "EAACnjNy2ZB0UBAAdkn6qUU165IVJSr1vGg7HVGe8LepSkSMZAlLBdQkRTUnIhXavYnkMZBzbgZCExcnWZAxUyZBBM3aZBmM9JGLJ0516FeSWLHkr12CIXCZBPfIRil5nZCRRkcUfTbBxq1Lk8FCQEbrGxt6RH0NcI3gX8s2x4QjR5q0O0zZAZAiTrpjTpHiupjrBBkOBz9VDu6EQgZDZD";
 FB_VERIFY_TOKEN = "vanhoa00";
 FB_APP_SECRET = "f2405128f7e16e4321ddc1e02f033288";
 
@@ -98,11 +98,11 @@ async function handleMessage(sender_psid, received_message) {
       let list;
       let response;
       if (!keyword) {
-        list = await academyModel.getAll("desc", 1, 3);
+        list = await academyModel.getAll(null, "desc", null);
         response = askTemplateButtonAcademy("Kết quả tìm kiếm:", list);
       } else {
-        list = await academyModel.search(keyword, "desc", 1, 3);
-        response = askTemplateButtonAcademy("Kết quả tìm kiếm:", list[0]);
+        list = await academyModel.search(keyword, null, "desc", null);
+        response = askTemplateButtonAcademy("Kết quả tìm kiếm:", list);
       }
       callSendAPI(sender_psid, response, function () {
         callSendAPI(sender_psid, askTemplate());
@@ -134,7 +134,7 @@ async function handlePostback(sender_psid, received_postback) {
     let categoryId = payload.slice("ACADEMY_OF_CATEGORY_".length);
     const list = await categoryModel.getAcademyByCategoryId(categoryId, 1, 3);
 
-    let response = askTemplateButtonAcademy("Danh sách khoá học:", list);
+    let response = askTemplateButtonAcademy2("Danh sách khoá học:", list);
     callSendAPI(sender_psid, response);
   } else if (payload.indexOf("ACADEMY_ID_") != -1) {
     let academyId = payload.slice("ACADEMY_ID_".length);
@@ -189,21 +189,21 @@ function askTemplateButtonCategory(text, array) {
       type: "template",
       payload: {
         template_type: "generic",
-        elements: [
-          {
-            title: text ? text : "Can I help you?",
-            buttons: [],
-          },
-        ],
+        elements: [],
       },
     },
   };
 
   for (let i = 0; i < array.length; i++) {
-    messageData.attachment.payload.elements[0].buttons.push({
-      type: "postback",
-      title: array[i].academy_category_name,
-      payload: "ACADEMY_OF_CATEGORY_" + array[i].academy_category_id,
+    messageData.attachment.payload.elements.push({
+      title: text ? text : "Can I help you?",
+      buttons: [
+        {
+          type: "postback",
+          title: array[i].academy_category_name,
+          payload: "ACADEMY_OF_CATEGORY_" + array[i].academy_category_id,
+        },
+      ],
     });
   }
 
@@ -216,21 +216,48 @@ function askTemplateButtonAcademy(text, array) {
       type: "template",
       payload: {
         template_type: "generic",
-        elements: [
-          {
-            title: text ? text : "Can I help you?",
-            buttons: [],
-          },
-        ],
+        elements: [],
+      },
+    },
+  };
+
+  for (let i = 0; i < array.listAcademy.length; i++) {
+    messageData.attachment.payload.elements.push({
+      title: text ? text : "Can I help you?",
+      buttons: [
+        {
+          type: "postback",
+          title: array.listAcademy[i].academy_name,
+          payload: "ACADEMY_ID_" + array.listAcademy[i].academy_id,
+        },
+      ],
+    });
+  }
+
+  return messageData;
+}
+
+function askTemplateButtonAcademy2(text, array) {
+  let messageData = {
+    attachment: {
+      type: "template",
+      payload: {
+        template_type: "generic",
+        elements: [],
       },
     },
   };
 
   for (let i = 0; i < array.length; i++) {
-    messageData.attachment.payload.elements[0].buttons.push({
-      type: "postback",
-      title: array[i].academy_name,
-      payload: "ACADEMY_ID_" + array[i].academy_id,
+    messageData.attachment.payload.elements.push({
+      title: text ? text : "Can I help you?",
+      buttons: [
+        {
+          type: "postback",
+          title: array[i].academy_name,
+          payload: "ACADEMY_ID_" + array[i].academy_id,
+        },
+      ],
     });
   }
 
@@ -246,7 +273,8 @@ function askTemplateAcademyDetail(academy) {
         elements: [
           {
             title: academy.academy_name,
-            subtitle: "Price: " + academy.price,
+            subtitle:
+              "Price: " + academy.price + "\nTeacher: " + academy.teacher.name,
             image_url: academy.avatar,
             buttons: [
               {

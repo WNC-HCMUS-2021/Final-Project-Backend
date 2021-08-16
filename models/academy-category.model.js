@@ -80,4 +80,20 @@ module.exports = {
       .select("c.*")
       .limit(4);
   },
+
+  //get academy by categoryID
+  async getAcademyByCategoryId(
+    categoryId,
+    page = 1,
+    limit = process.env.LIMIT
+  ) {
+    const result = await db("academy")
+      .where("academy_category_id", categoryId)
+      .limit(limit)
+      .offset((page - 1) * limit);
+    if (result.length <= 0) {
+      return null;
+    }
+    return result;
+  },
 };
