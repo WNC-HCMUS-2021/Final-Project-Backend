@@ -58,6 +58,7 @@
   "changePW": {
     "required": [
       "user_id",
+      "old_password",
       "password",
       "confirm_password"
     ],
@@ -65,6 +66,7 @@
     "additionalProperties": true,
     "properties": {
       "user_id": { "type": "integer" },
+      "old_password": { "type": "string", "minLength": 6 },
       "password": { "type": "string", "minLength": 6 },
       "confirm_password": { "type": "string", "minLength": 6 }
     }

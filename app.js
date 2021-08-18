@@ -42,6 +42,7 @@ app.use(
 );
 app.use("/api/admin/academy", auth, require("./routes/admin/academy.route"));
 app.use("/api/admin/user", auth, require("./routes/admin/user.route"));
+app.use("/api/admin/auth", require("./routes/admin/auth.route"));
 
 // Routes For user
 

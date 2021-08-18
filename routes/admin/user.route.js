@@ -64,7 +64,14 @@ router.put('/', require('../../middlewares/validate.mdw')(schema.update), async 
     delete user.password; delete user.username; delete user.email;
     const result = await userModel.editTeacherById(req.body.user_id, user);
 
-    successResponse(res, 'Update data success', result);
+    if (result) {
+        var data = await userModel.getDetailUser(req.body.user_id);
+        successResponse(res, 'Update data success', data);
+    } else {
+        successResponse(res, 'Update fail', null, 400, result);
+    }
+
+    
 });
 
 // thay đổi mật khẩu
@@ -74,8 +81,14 @@ router.put('/change-password', require('../../middlewares/validate.mdw')(schema.
     if (user.password !== user.confirm_password) {
         successResponse(res, 'Confirm password is not match', null, 400, false);
     }
-    user.password = bcrypt.hashSync(user.password, 10);
+    // check with old password
+    var userInfo = await userModel.getDetailUser(req.body.user_id);
+    if (!bcrypt.compareSync(req.body.old_password, userInfo.password)) {
+        successResponse(res, 'Old password incorrect', null, 400, false);
+    }
+
     // update
+    user.password = bcrypt.hashSync(user.password, 10);
     console.log(user);
     const result = await userModel.changePasswordUser(req.body.user_id, user.password);
 
